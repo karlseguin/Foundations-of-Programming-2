@@ -14,6 +14,25 @@ This book is currently in development. The final release is expected to be in ea
 
 To get the latest version, visit <http://github.com/karlseguin/foundations2>.
 
+## About The Author ##
+Karl Seguin is a developer with experience across various fields and technologies. He's an expert .NET developer and burgeoning Ruby developer. He's familiar with all aspects of web development, concurrent and socket programming and various SQL and NoSQL technologies. He's a semi active contributor to OSS projects, a technical writer and an occasional speaker.
+
+His blog can be found at <http://openmymind.net>, and he tweets via [@karlseguin](http://twitter.com/karlseguin)
+
+He's also the founder of the free services for casual game developers <http://mogade.com>.
+
+## Introduction ##
+I'm always amazed by the number of passionate programmers I run into. So much of our life is dedicated to work that we are fortunate for the opportunity to spend that time doing what we love. This isn't a unique property of programmers, but it's uncommon enough to be surprising to most people. "You go home and *work* every day?" we are asked. Only our closest friends, and passionate colleagues really understand that *work* has two meanings for us, neither of which is a 9-5 drudge.
+
+You've probably noticed that enthusiasm and drive is a pretty critical thing to have in such a young field. Technology continues to change at a rapid pace, the field is growing, and systems are getting increasingly complex. The result is a clear divide between programmers who love their craft and those who don't. You're either learning, trying and sometimes failing, or you're stuck in the past, likely oblivious to just how far behind you've fallen.
+
+Unfortunately, being passionate about what you do isn't always enough. We all have different strengths and weaknesses, different ways to learn, and different tolerance towards failure. There's also a constant stream of new technologies which makes it hard to figure out what to spend your time learning. The truth is that I'm not a great programmer. I'm a good programmer who likes to learn (and teach) and who enjoys playing with technology. I've seen people pick up new languages in days when its taken me months, or write algorithms that I had to pretend to agree with because I just wasn't following. The Foundations of Programming series is meant to help people like me, people who care about what they do, want to do it better, but aren't always sure how to proceed.
+
+I hope this book will help you.
+
+### With Respect To The Original ###
+The [original Foundations of Programming](https://github.com/karlseguin/Foundations-of-Programming-Ebook) has been, by my own standards, a success. It seems to have genuinely helped developers and served a need which clearly needed serving. Each book, the original and this one, stand on their own; they are independent from each other. However, I would suggest that if you plan on reading the original, you do so before continuing with this book. My views have matured and in some cases changed or clarified. I think much can be gained by seeing how I've evolved as a programmer.
+
 ## Chapter 1 - Quality and Efficiency ##
 >"Quality is never an accident; it is always the result of intelligent effort." - John Ruskin
 
