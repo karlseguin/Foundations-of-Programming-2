@@ -141,7 +141,7 @@ This code has two dependencies which we'd do well to decouple: the first being `
 		}	
 	}
 
-(For completeness sake, we made `UserRepository` implement from an interface as well so that it too can now be injected into calling code).
+(For completeness sake, we made `UserRepository` implement an interface as well so that it too can now be injected into calling code).
 
 Our code now shields us from direct implementations, making it easier to change, maintain and test. Also, while the `FindByCredentials` method might be seen by some as slightly less explicit (which I agree with), if you really think about it, you'll find that the `UserRepository` class as a whole is now more explicit. You can quickly look at the `UserRepository` constructor and gain a good understanding for *how* it achieves what it does. Yet another benefit, which we'll talk more about in a following chapter, is that constructor injection helps keep our classes cohesive (having a narrow, defined, purpose) - as having too many dependencies often means having a class that does too much.
 
@@ -175,7 +175,7 @@ The DI framework will see that the constructor for `UserRepository` (the configu
 
 Keep in mind that the goal of DI frameworks isn't to make your code dynamically pluggable. The idea isn't to be able to hot-swap your `SQLServerDataStore` with a `PostgreSQLServerDatastore`. It's simpler than that. We want to program against interfaces and have those interfaces injected where necessary. It's something we can do manually, but even simple examples can be a pain. The DI framework automates a very small, yet important, part of the process (object creation with auto-wiring).
 
-It's hard to pass up an opportunity to complain about XML-based configuration, so...Most .NET frameworks provide both code-based (as seen above) and XML-based configuration. The benefit of code-based is that you are able to refactor as well as test your configuration. There's no advantage to XML-based configuration, though some developers will state that with XML they don't need to recompile and retest their code. I say that's crap: a change to in your configuration, regardless of where it's stored, needs to go through the smae QA and deployment procedures as any other code change.
+It's hard to pass up an opportunity to complain about XML-based configuration, so...Most .NET frameworks provide both code-based (as seen above) and XML-based configuration. The benefit of code-based is that you are able to refactor as well as test your configuration. There's no advantage to XML-based configuration, though some developers will state that with XML they don't need to recompile and retest their code. I say that's crap: a change in your configuration, regardless of where it's stored, needs to go through the same QA and deployment procedures as any other code change.
 
 ### Dependency Injection Framework Anti Pattern ###
 Ending our introduction on Dependency Injection with what we covered above would be a disservice. We've covered the mechanics of DI and DI Frameworks, but in focusing on the *what* we've introduced some pretty nasty *hows*. Our `kernel` instance from the last example is thread-safe, and we could create a static class and call something like `Factory.Get<T>` everywhere in our code. As we suggested above, DI frameworks can be seen as a replacement for `new`, so that might seem a logical approach.
