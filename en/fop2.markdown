@@ -102,12 +102,12 @@ Before we look at IoC, let's understand the problem we are trying to solve. Coup
 
 In each of the above examples, our code is dependent on some other implementation. Practically every line of code you write will, technically speaking, generate coupling. A lot of the time coupling is benign - no one's suggesting that you wrap every core library/type. However, more complex cases often lead to testability challenges, which indicate that code is hard to change and maintain.  The last example is the most obvious as it's impossible to test without actually hitting the database (we'll talk more about that in a future chapter, because hitting the database isn't at all a bad idea).
 
-The kind of tight coupling we want to avoid are the dependencies between independent components or systems. Admittedly, saying that coupling makes it difficult to change the implementation isn't always compelling - sometimes you can be reasonably certain that the implementation is **not** going to change. However, tight coupling will also make it more difficult to maintain, reuse and refactor your code.
+The kinds of tight coupling we want to avoid are those that introduce dependencies between independent components or systems. Admittedly, saying that coupling makes it difficult to change the implementation isn't always compelling - sometimes you can be reasonably certain that the implementation is **not** going to change. However, tight coupling will also make it more difficult to maintain, reuse and refactor your code.
 
 ### Inversion of Control Basics ###
-If coupling, having X depend on Y, is the problem, then Inversion of Control is the solution. IoC is an umbrella term for various solutions that help us decouple or, at the very least, loosen coupling. The general idea is to change the normal (procedural) flow for something you have greater control over. To better understand the concept, let's look at the most common form of IoC in the .NET/Java world: Dependency Injection (DI).
+If coupling (having X depend on Y) is the problem, then Inversion of Control is the solution. IoC is an umbrella term for various solutions that help us decouple or, at the very least, loosen coupling. The general idea is to change the normal (procedural) flow for something you have greater control over. To better understand the concept, let's look at the most common form of IoC in the .NET/Java world: Dependency Injection (DI).
 
-The name *Dependency Injection* is pretty telling of what the practice entails: injecting dependencies into our code rather than statically defining them (hard coding). We look at this form of IoC first not because it's better or simpler, but because the result is particularly explicit and because it's an approach which is independent of the language/framework/technology we are using.
+The name *Dependency Injection* is pretty telling of what the practice entails: injecting dependencies into our code rather than statically defining them (hard coding). We look at this form of IoC first not because it's better or simpler, but because the result is particularly explicit and because it's an approach that is independent of the language/framework/technology we are using.
 
 Take the following example:
 
@@ -145,7 +145,7 @@ This code has two dependencies which we'd do well to decouple: the first being `
 
 Our code now shields us from direct implementations, making it easier to change, maintain and test. Also, while the `FindByCredentials` method might be seen by some as slightly less explicit (which I agree with), if you really think about it, you'll find that the `UserRepository` class as a whole is now more explicit. You can quickly look at the `UserRepository` constructor and gain a good understanding for *how* it achieves what it does. Yet another benefit, which we'll talk more about in a following chapter, is that constructor injection helps keep our classes cohesive (having a narrow, defined, purpose) - as having too many dependencies often means having a class that does too much.
 
-From the above example you should be able to guess what method and property injection look like. Injecting into a method is useful when only that method has a specific dependency (though it should be used sparingly as it's generally not a great sign about the cohesiveness between the method and its class). Property injection is great for optional dependencies (which is also quite rare). Property injection is also useful for internal framework code when you don't want or need inheriting classes having to expose complex constructors.
+From the above example you should be able to guess what method and property injection look like. Injecting into a method is useful when only that method has a specific dependency (though it should be used sparingly as it's generally not a great sign of the cohesiveness between the method and its class). Property injection is great for optional dependencies (which is also quite rare). Property injection is also useful for internal framework code when you don't want or need inheriting classes having to expose complex constructors.
 
 ### Dependency Injection Frameworks ###
 In the communities where DI is a common pattern, DI frameworks are readily available and talked about; thus we'll keep this rather brief. What you need to know is that the DI example we looked at above, when manually done, can add a noticeable amount of overhead to our coding. If, from user input to external service (database, web service, etc.), our code is roughly 4-5 levels deep, and your average class might have a dependency on 1-3 other classes/components, then tracking and instantiating our objects isn't going to be a whole lot of fun.
@@ -157,13 +157,13 @@ Let's look at an example using [Ninject](http://ninject.org/). The first thing w
 	private sealed class BoostrapDependencyModule : NinjectModule
 	{
 		public override void Load()
-    {
+		{
 			Bind<IUserRepository>().To<UserRepository>();
-    	Bind<IDataStore>().To<SqlDataStore>();
+			Bind<IDataStore>().To<SqlDataStore>();
 				
 			//makes this a singleton
-    	Bind<IEncryptor>().To<Encryptor>().InSingletonScope();
-    }
+			Bind<IEncryptor>().To<Encryptor>().InSingletonScope();
+		}
 	}
 
 We can now create an Ninject kernel and ask it for instances:
@@ -178,7 +178,7 @@ Keep in mind that the goal of DI frameworks isn't to make your code dynamically 
 It's hard to pass up an opportunity to complain about XML-based configuration, so...Most .NET frameworks provide both code-based (as seen above) and XML-based configuration. The benefit of code-based is that you are able to refactor as well as test your configuration. There's no advantage to XML-based configuration, though some developers will state that with XML they don't need to recompile and retest their code. I say that's crap: a change in your configuration, regardless of where it's stored, needs to go through the same QA and deployment procedures as any other code change.
 
 ### Dependency Injection Framework Anti Pattern ###
-Ending our introduction on Dependency Injection with what we covered above would be a disservice. We've covered the mechanics of DI and DI Frameworks, but in focusing on the *what* we've introduced some pretty nasty *hows*. Our `kernel` instance from the last example is thread-safe, and we could create a static class and call something like `Factory.Get<T>` everywhere in our code. As we suggested above, DI frameworks can be seen as a replacement for `new`, so that might seem a logical approach.
+Ending our introduction on Dependency Injection with what we covered above would be a disservice. We've covered the mechanics of DI and DI Frameworks, but in focusing on the *what*, we've introduced some pretty nasty *hows*. Our `kernel` instance from the last example is thread-safe, and we could create a static class and call something like `Factory.Get<T>` everywhere in our code. As we suggested above, DI frameworks can be seen as a replacement for `new`, so that might seem a logical approach.
 	
 As a general rule, you want to try to limit directly using the DI framework. If you are using a modern framework, there should be hooks where the framework stops and your code starts to make this possible. For example, ASP.NET MVC allows you to provide a custom controller factory which can then be used as a starting point for the dependency resolution process. In fact, most DI frameworks will provide these hooks for various frameworks, such as Ninject's `NinjectHttpApplication` which you simply inherit from, tell it about your modules, and move on. As a simple check, search your solution for how many times you are importing your DI's namespace (if you are using Ninject, you could search for `using Ninject`), hopefully you won't find it in more than 4 or 5 places.
 
