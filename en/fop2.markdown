@@ -26,7 +26,7 @@ I'm always amazed by the number of passionate programmers I run into. So much of
 
 You've probably noticed that enthusiasm and drive is a pretty critical thing to have in such a young field. Technology continues to change at a rapid pace, the field is growing, and systems are getting increasingly complex. The result is a clear divide between programmers who love their craft and those who don't. You're either learning, trying and sometimes failing, or you're stuck in the past, likely oblivious to just how far behind you've fallen.
 
-Unfortunately, being passionate about what you do isn't always enough. We all have different strengths and weaknesses, different ways to learn, and different tolerance towards failure. There's also a constant stream of new technologies which makes it hard to figure out what to spend your time learning. The truth is that I'm not a great programmer. I'm a good programmer who likes to learn (and teach) and who enjoys playing with technology. I've seen people pick up new languages in days when its taken me months, or write algorithms that I had to pretend to agree with because I just wasn't following. The Foundations of Programming series is meant to help people like me, people who care about what they do, want to do it better, but aren't always sure how to proceed.
+Unfortunately, being passionate about what you do isn't always enough. We all have different strengths and weaknesses, different ways to learn, and different tolerance towards failure. There's also a constant stream of new technologies which makes it hard to figure out what to spend your time learning. The truth is that I'm not a great programmer. I'm a good programmer who likes to learn (and teach) and who enjoys playing with technology. I've seen people pick up new languages in days when it's taken me months, or write algorithms that I had to pretend to agree with because I just wasn't following. The Foundations of Programming series is meant to help people like me, people who care about what they do, want to do it better, but aren't always sure how to proceed.
 
 I hope this book will help you.
 
@@ -40,7 +40,7 @@ Pragmatically, the reason I, and I assume most programmers, are keen to learn is
 
 Management-type might solely align quality with client/user satisfaction. While that's certainly important, good programmers are almost always the stakeholders with the highest quality expectation as well as being the most critical. As DeMarco and Lister said in Peopleware, **We all tend to tie our self-esteem strongly to the quality of the product we produce - not the quantity of the product, but the quality;.** I find it difficult to put quality, from a programmers perspective, into words; yet, I'm sure most of us not only have a similar definition, we can all easily recognize it (or the lack of it). Quality is about coming up with an elegant solution to a problem - both at the micro (an individual behavior) and macro levels (the system as a whole). What's *elegant* then? It varies on the context of the problem, but generally, an elegant solution is both the simplest possible one as well as the most explicit and easy to understand.
 
-The more I've program, the more I've notice something truly startling. Not only is the simplest solution obviously the easiest to implement, its almost certainly the easiest to understand, maintain and change. Simple solutions also tend to have as good or better performance characteristics than more complex approaches. This is particularly astounding when you find yourself knee-deep in an over-engineered mess where the original intention for flexibility, performance and efficiency are sabotaged by artificial complexity. That doesn't mean I advocate programming without consideration of design. Instead, I believe that given some experience and reflection, a balance between forward-thinking design and pragmatism isn't only achievable, its quite natural?
+The more I've program, the more I've notice something truly startling. Not only is the simplest solution obviously the easiest to implement, it's almost certainly the easiest to understand, maintain and change. Simple solutions also tend to have as good or better performance characteristics than more complex approaches. This is particularly astounding when you find yourself knee-deep in an over-engineered mess where the original intention for flexibility, performance and efficiency are sabotaged by artificial complexity. That doesn't mean I advocate programming without consideration of design. Instead, I believe that given some experience and reflection, a balance between forward-thinking design and pragmatism isn't only achievable, it's quite natural?
 
 I wish I could tell you the answer. It isn't that I don't know. The problem is that I have to preface it with a word of warning; else I risk having you roll your eyes and give up on this book. I know a lot of you are sick of hearing about it, but I beg that you hear me out and recognize that I'm probably not saying what you think I'm saying. Deal? So the secret to writing quality code is to make sure your code is testable. WAIT...don't roll those eyes, I'm not saying that you have to test your code (and I'm certainly not saying that you shouldn't). I'm just saying that if, theoretically, you were to test your code, it shouldn't be hard to do. Code can be testable without actually testing it - and ultimately, at the most fundamental level, that's what you should be aiming for.
 
@@ -186,3 +186,262 @@ The point is that with static languages, DI should be more of a configuration/se
 
 ### In This Chapter ###
 In this chapter we looked at what Inversion of Control is as well as the problem we are trying to solve with it (reducing coupling). We also saw a common IoC pattern, Dependency Injection. For a lot of developers this is a different way of programming and thinking. Remember though that we do gain a lot from it: code is easier to change and refactor, classes with poor cohesion are easier to spot and tests are easier to write. 
+
+## Chapter 3 - IoC 180&deg; ##
+> "If you do not raise your eyes you will think that you are the highest point" - Antonio Porchia
+
+When you first learn about IoC and start playing with a DI framework, you don't think to yourself *I wonder how else I could resolve dependencies?* Why would you? DI is straightforward as well as being a good fit with how most people organize their Java or .NET code. No one would blame you for thinking, like I did, that this is how everyone does it. It isn't. DI is a pattern suited for object oriented programming with static languages. Switch to a different paradigm and you'll find different solutions.
+
+### Dynamic Mind Shift ###
+It's common for developers to think of dynamic languages and dynamic typing as synonyms. It's true that most (though not all) dynamic languages are dynamically typed. The fact though is that dynamic languages execute many things at runtime, which static languages do at compile time. The implication is that, within a dynamic runtime, developers have greater capabilities at runtime than their static counterparts.
+
+At first such power might seem to be of limited use. After all, how often do you need to change your code at runtime? This is true of most features you don't have access to though. Consider the features which have been added to C#, before they existing, you possibly didn't even know they could exist. Eventually these additions reshaped how you coded: generics, anonymous methods, LINQ. A dynamic runtime is the same: the impact is difficult to grasp as long as the way you think is constrained by your experience with static languages. Reflection isn't an integral part of your work because it's both limited and cumbersome; yet make it powerful and simple and it might be a tool you leverage on a daily basis. (To be honest, comparing dynamic languages with reflection is hugely unjust to dynamic languages, we're just trying to draw some initial parallels.)
+
+What does this have to do with Inversion of Control? The flexible nature of dynamic languages means that IoC is built directly into most dynamic languages. There's no need to inject parameters or use a framework, simply leverage the language's capabilities. Let's look at an example:
+
+	class User
+	  def self.find_user(username, password)
+	    user = first(:conditions => {:username => username})
+	    user.nil? || !Encryptor.password_match(user, password) ? nil : user
+	  end
+	end
+
+Our code has two dependencies: `first` will access an underlying store (which may not be obvious if you aren't familiar with Ruby) and `Encryptor` is a made-up class responsible for matching a user's hashed password with a supplied password. In a static world both of these would be troublesome. In ruby, and other dynamic languages? Simply change what `first` and `Encryptor` do:
+
+	def password_match_returns(expected)
+		metaclass = class << Encryptor; self; end
+		metaclass.send :define_method, :password_match do
+			return expected
+		end
+	end
+  
+	def first_returns(expected)
+		metaclass = class << User; self; end
+		metaclass.send :define_method, :first do
+			return expected
+		end
+	end
+
+Keep an open mind and remember that this code may be as mysterious to you as anonymous methods (and lambdas) are to someone else. We'll discuss the code in further detail, but let's first look at how it might be used:
+
+	it "returns the found user" do
+	  user = User.new
+	  first_returns(user)
+	  password_match_returns(true)
+	  User.find_user('leto', 'ghanima').should == user
+	end
+
+In real life you'd use a mocking framework to take care of this and provide a cleaner syntax and more powerful features. But, putting aside some of the magic, we can see that our methods `define_method`, at runtime, to implement behavior that our test can use. To really start understanding this, we need to cover metaclasses.
+
+#### Singleton and Metaclasses ####
+
+In C#, Java and most static languages a class can safely be thought of as a rigid template. You define fields and methods and compile your code using classes as an immutable contract. Classes serve a very useful purpose as a design-time tool. The problem with classes, by no fault of their own, is that most programmers think classes and object-oriented programming are one and the same. They aren't. Object orientated programming is, as the name implies, about the living objects of your running code. In a static language this means instances. Since instances are tightly bound to the template defined by their respective class, it's easy to see why developers mix the two concepts.
+
+Look beyond static languages though and you'll see a different story: not only is there no law that says  classes cannot themselves be living things, but object oriented programming can happily exists without classes. The best example that you're probably already familiar would be from JavaScript. Behold, OOP without classes:
+
+	var leto = {
+		fullName: 'Leto Atreides II',
+		title: 'Emperor',
+		yearOfBirth: 10207,
+		getAngryWithDuncan: function(duncan) {
+			duncan.alive = false;
+		}
+	};
+	
+	var duncan = {
+		ghola: true,
+		alive: true
+	};
+	
+	leto.getAngryWithDuncan(duncan);
+
+As always, the point isn't that one approach is better than another, but rather to gain a different perspective - likely, in this case, on knowledge you already possess. Doing a decade of object oriented programming a certain manner has a way of limiting your imagination.
+
+So object oriented doesn't *require* classes, but as templates classes are quite handy. This is where ruby and metaclasses come in; because, as we've already mentioned, there's no law that says a class has to be a predefined and unchangeable template.
+
+In ruby every object has its own class, called a singleton class. This let's you define members on specific instances, like:
+
+	goku = Sayan.new
+	vegeta = Sayan.new
+	
+	def goku.is_over_9000?
+		true #in ruby, the last executed statement is automatically returned
+	end
+	
+	p goku.is_over_9000?  	=> true
+	p vegeta.is_over_9000?	=> NoMethodError: undefined method `is_over_9000?'
+
+Technically, we aren't adding the `is_over_9000?` method to the `goku` object, we are adding it to its invisible singleton class, which `goku` inherits from and thus has access to. We call the singleton class invisible because both `goku.class` and `vegeta.class` will return `Sayan`. There are ways to expose a singleton class, but when you aren't doing metaprogramming, singleton classes are transparent.
+
+To get access to a singleton class, which is itself a real object, we use the `class << ` syntax. For example the `is_over_9000?` method could alternatively be defined like so:
+	
+	class << goku
+		def is_over_9000?
+			true
+		end
+	end
+
+If we want to assign the singleton class to a variable, we can simply expose `self` from:
+
+	singleton = class << goku
+		self
+	end
+	
+	#or, more common and concisely, using ; instead of newlines
+	singleton = class << goku; self; end
+
+Interestingly (and I'm not too sure why I find it interesting), if we look at the `goku` and `singleton` instances, we get the following output:
+
+	goku
+	=> #<Sayan:0x10053a1f0>
+	singleton
+	=> #<Class:#<Sayan:0x10053a1f0>>
+
+In Ruby, everything is an object. Even a class is an object (which inherits from Class, which in turn inherits from Object). That means you can invoke methods on your classes:
+
+	Sayan.is_a?(Object)
+	=> true
+	Saya.is_a?(Integer)
+	=> false
+	Sayan.to_s
+	=> "Sayan"
+	...
+
+Since classes are objects they too have singleton classes (which are often called metaclasses). We can get access to a class' metaclass via the same `class <<` syntax we used for an instance:
+
+	metaclass = class << Sayan
+		self
+	end
+	#or, the more consice approach
+	metaclass = class << Sayan; self; end
+
+Singleton classes aren't really something you'll deal with too often, but metaclasses are because class methods are defined in the metaclasses. Class methods are, in a lot of ways, like static methods in C# or Java. They are defined one of two ways and used like you'd expect:
+
+	
+	class Sayan
+		# First way to define a class method, use self.methodName
+		def self.find_most_powerful()
+		  # todo
+		end
+		
+		#second method, opening the metaclass
+		class << self
+			def self.all_by_level(superSayanLevel)
+				# todo
+			end
+		end
+	end
+	
+	powerfulSayans = Sayan.all_by_level(3)
+
+(Understanding `self` in Ruby, specifically what `self` refers to in a given context, is important to mastering the language.)
+
+The key difference though, between Ruby class methods and Java/C# static methods, is that class methods are defined against a metaclass which is an object. In other words, while class methods resemble static methods, they actually share more in common with instance methods (just of a very special instance). Keep this key concept in mind while you take another look at our the manual stub we introduced early in this chapter:
+
+	def password_match_returns(expected)
+		metaclass = class << Encryptor; self; end
+		metaclass.send :define_method, :password_match do
+			return expected
+		end
+	end
+
+What does all this get us? Much of the rigidness you'll bump up against in a static language doesn't exist in dynamic language. Sealed classes, non virtual methods and static method, which are mechanisms to stop you from doing something, vanish. There are pros and cons of both approaches, but there's no reason not to be familiar with both. 
+
+I do want to point out that, from a testability perspective, metaprogramming does have significant advantages - the difficulty in testing a static `password_match` method in C# should be proof enough of that. DI isn't common in Ruby because it isn't necessary. The decoupling you achieve in C# via injecting interfaces and managing dependencies (DI) is replaced by the very nature of the Ruby language. 
+
+### Events/Callbacks ###
+Another way to reduce coupling is to leverage events and callbacks. It's been long understood that events, by their very nature, provide protection against coupling. Code which raises an event is saying *I don't care who you are or what you are going to do, but it's time to do it.* There could be 0 listeners, or a hundred, they could do all sorts of unrelated things, but none of that matters to the calling code. The code ends up easy to test because, from the caller's point of view, you just need to verify that the event is raised and from the callee's point of view that they register for the event.
+
+The reason we don't use events everywhere is because they just don't lend themselves to the linear flow we use for most code. However, over the last couple years, this has started to change. Why? The resurgence of JavaScript. We now have more code written in JavaScript than ever before, more developers are letting go of their old (generally negative) perceptions and learning the language anew. JavaScript is no longer a place where we can rely on hacks and hope it all keeps working. There's been a shift towards quality and maintainable JavaScript. That means we need to start worrying about coupling, cohesion and testability. When it comes to that, events are to JavaScript what DI is to Java/C# or metaprogramming is to Ruby.
+
+Let's say you're a [jQuery](http://www.jquery.com/) master (if you aren't, you can jump to Appendix A then B to start that journey whenever you want) and have built a series of generic plugins. These are things that we plan on reusing throughout our site. A lot of these plugins will need to interact with each other. For example, one of the plugins turns a simple list of rows into a pageable and sortable grid, and another allows a form to be submitted via ajax. Of course, when the user submits a new record, via the ajax form, the fancy grid needs to be updated. First, lets look at the basic setup:
+
+	//applies the fancyGrid plugin to the element with an id of users
+	$('#users').fancyGrid();
+	
+	//applies the fancySubmit plugin to the element with an id of add_user
+	$('#add_user').fancySubmit();
+
+The core of our `fancySubmit` plugin will be something as simple as:
+
+	(function($) 
+	{
+	  $.fn.fancySubmit = function(options)
+		{
+	    return this.each(function()
+	    {
+	      var $form = $(this);
+	      var self = 
+	      {   
+	        initialize: function() 
+	        {
+         		$form.submit(function()
+         		{
+         			$.post($form.attr('action'), $form.serialize(), self.handleResponse);
+         			return false;	
+         		});
+	        },
+	        handleResponse: function(r)
+	        {
+	        	//what to do here?
+	        }
+	      };
+	      this.fancySubmit = self;
+	      self.initialize();      
+	    });
+	  };
+	})(jQuery);
+
+(If you aren't familiar with jQuery, this code is intercepting our form's `submit` event in order to submit the data via ajax. The response from that ajax called is then handled by the `handleResponse` function. Again, you might want to skip to Appendix A and B to get up to speed on jQuery.)
+
+`handleResponse` can handle generic cases (errors, validation) directly, but anything more specific will depend on the specific context it's being used in. The solution? Allow a callback to be passed into the plugin and trigger it when appropriate:
+
+	handleResponse: function(r){
+		//add some generic handling here first, maybe
+		if (options.onSubmit != null) { options.onSubmit(r); }
+	}
+
+With that simple change, we can now tie the two plugins together, without really having to tie them together:
+
+	//applies the fancyGrid plugin to the element with an id of users
+	var $users = $('#users').fancyGrid();
+	
+	//applies the fancySubmit plugin to the element with an id of add_user
+	$('#add_user').fancySubmit({
+		onSubmit: function(r) { $users.fancyGrid('newRow', r); }
+	});
+
+Using this approach, the two plugins work together without knowing anything about each other. This helps ensure that your code stays highly reusable and cohesive.
+
+### Testing It ###
+We can test `handleResponse` by supplying a fake callback which can make some basic assertions. However, we have to deal with call to `$.post`. Since JavaScript is dynamic like Ruby, it too provides a mechanism to change our runtime definitions. Combining our dynamic rewrite with our custom callbacks yields:
+
+	test("executes the onSubmit callback after receiving a response", function()
+	{
+		expect(1);
+		//overwrite the $.post method to always execute the callback with a canned response
+		$.post = function(url, params, callback) 
+		{ 
+			callback('the new row'); 
+		}
+		
+		var $form = $('#a_test_form');
+		$form.fancySubmit(
+		{
+			onSubmit: function(r) 
+			{ 
+				ok(r == 'the new row', 'callback with response was called'); 
+			}
+		});
+		
+		$form.submit();
+	});
+
+Ignore the call to `expect` for now, we'll get to it in a minute. We rewrite the `$.post` function, circumventing the heavy implementation with something controllable and lightweight. `$.post` now essentially executes the 3rd parameter (which if we look back up at the plugin is a call to `self.handleResponse`) with a hardcoded parameters. Next, we initialize the plugin with our callback, which will assert that the supplied parameter is what we expect. Finally, we actually submit the form to execute the actual code.
+
+About the call to `expect`, this tells our testing framework, [Qunit](http://docs.jquery.com/Qunit) in this case, that 1 expectation should be called. This is key when dealing with callbacks and events. What would happen if we didn't call `expect` and also changed our plugin to not invoke our callback? Our test would still pass because nothing would ever be asserted. By specifying `expect(1)` we ensure that our real expectation (that our callback is called, and called with the correct parameters) is invoked - if `ok` isn't called, then `expect` will fail and we'll know something isn't right.
+
+The introduction of anonymous methods and lambdas make similar code possible, and even preferable in some situations, in C#.
+
+### In This Chapter ###
+Depending on your experience with Ruby and jQuery, this chapter might have been overwhelming. We covered some advanced techniques in languages less familiar to us. We possibly picked the most complicated part of Ruby to look at (metaprogramming), so don't be discouraged if you missed some, or even most, of it. We also saw some pretty different testing scenarios. Most important though was how we were able to relearn something we thought we knew well (IoC) by learning what's fundamental to others. You can almost consider IoC a built-in feature of Ruby, much like you'd see LINQ as a built-in feature of C#. Even if you don't understand the nuance of the code or the implications it has on day to day programming, this chapter should still showcase the value of learning and growing.
