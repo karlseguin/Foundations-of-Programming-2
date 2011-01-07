@@ -195,7 +195,7 @@ When you first learn about IoC and start playing with a DI framework, you don't 
 ### Dynamic Mind Shift ###
 It's common for developers to think of dynamic languages and dynamic typing as synonyms. It's true that most (though not all) dynamic languages are dynamically typed. The fact though is that dynamic languages execute many things at runtime, which static languages do at compile time. The implication is that, within a dynamic runtime, developers have greater capabilities at runtime than their static counterparts.
 
-At first such power might seem to be of limited use. After all, how often do you need to change your code at runtime? It seems though, like we often think a feature isn't useful until we have access to it. Consider the features which have been added to C#, before they existed, you possibly didn't even know they could exist. Eventually these additions reshaped how you coded: generics, anonymous methods, LINQ. A dynamic runtime is the same: the impact is difficult to grasp as long as the way you think is constrained by your experience with static languages. Reflection isn't an integral part of your work because it's both limited and cumbersome; yet make it powerful and simple and it might be a tool you leverage on a daily basis. (To be honest, comparing dynamic languages with reflection is hugely unjust to dynamic languages, we're just trying to draw some initial parallels.)
+At first such power might seem to be of limited use. After all, how often do you need to change your code at runtime? It seems though, like we often think a feature isn't useful until we have access to it. Consider the features which have been added to C#, before they existed, you possibly didn't even know they could exist. Eventually these additions reshaped how you coded: generics, anonymous methods, LINQ. A dynamic runtime is the same, the impact is difficult to grasp as long as the way you think is constrained by your experience with static languages. Reflection isn't an integral part of your work because it's both limited and cumbersome; yet make it powerful and simple and it might be a tool you leverage on a daily basis. (To be honest, comparing dynamic languages with reflection is hugely unjust to dynamic languages, we're just trying to draw some initial parallels.)
 
 What does this have to do with Inversion of Control? The flexible nature of dynamic languages means that IoC is built directly into most dynamic languages. There's no need to inject parameters or use a framework, simply leverage the language's capabilities. Let's look at an example:
 
@@ -259,7 +259,7 @@ As always, the point isn't that one approach is better than another, but rather 
 
 So object oriented doesn't *require* classes, but as templates classes are quite handy. This is where ruby and singleton classes come in; because, as we've already mentioned, there's no law that says a class has to be a predefined and unchangeable template.
 
-In ruby every object has its own class, called a singleton class. This let's you define members on specific instances, like:
+In ruby every object has its own class, called a singleton class. This lets you define members on specific instances, like:
 
 	class Sayan
 		# our class defition for a Sayan
@@ -310,7 +310,7 @@ In Ruby, everything is an object. Even a class is an object (which inherits from
 	Sayan.to_s
 	=> "Sayan"
 
-Since classes are objects they too have singleton classes (which are often called metaclasses). We can get access to a class' metaclass via the same `class <<` syntax we used for an instance:
+Since classes are objects, they too have singleton classes (which are often called metaclasses). We can get access to a class' metaclass via the same `class <<` syntax we used for an instance:
 
 	metaclass = class << Sayan
 		self
@@ -350,7 +350,7 @@ Another way to reduce coupling is to leverage events and callbacks. It's been lo
 
 The reason we don't use events everywhere is because they just don't lend themselves to the linear flow we use for most code. However, over the last couple years, this has started to change. Why? The resurgence of JavaScript. We now have more code written in JavaScript and more developers are letting go of their old (generally negative) perceptions and learning the language anew. JavaScript is no longer a place where we can rely on hacks and hope it all keeps working. There's been a shift towards quality and maintainable JavaScript. That means we need to start worrying about coupling, cohesion and testability. When it comes to that, events are to JavaScript what DI is to Java/C# or metaprogramming is to Ruby.
 
-Let's say you're a [jQuery](http://www.jquery.com/) master (if you aren't, you can jump to Appendix A then B to start that journey whenever you want) and have built a series of generic plugins. These are things that we plan on reusing throughout our site. A lot of these plugins will need to interact with each other. For example, one of the plugins turns a simple list of rows into a pageable and sortable grid, and another allows a form to be submitted via ajax. Of course, when the user submits a new record, via the ajax form, the fancy grid needs to be updated. First, lets look at the basic setup:
+Let's say you're a [jQuery](http://www.jquery.com/) master (if you aren't, you can jump to Appendix A then B to start that journey whenever you want) and have built a series of generic plugins. These are things that we plan on reusing throughout our site. A lot of these plugins will need to interact with each other. For example, one of the plugins turns a simple list of rows into a pageable and sortable grid, and another allows a form to be submitted via ajax. Of course, when the user submits a new record, via the ajax form, the fancy grid needs to be updated. First, let's look at the basic setup:
 
 	//applies the fancyGrid plugin to the element with an id of users
 	$('#users').fancyGrid();
@@ -441,4 +441,4 @@ About the call to `expect`, this tells our testing framework, [Qunit](http://doc
 The introduction of anonymous methods and lambdas make similar code possible, and even preferable in some situations, in C#.
 
 ### In This Chapter ###
-Depending on your experience with Ruby and jQuery, this chapter might have been overwhelming. We covered some advanced techniques in languages less familiar to us. We possibly picked the most complicated part of Ruby to look at (metaprogramming), so don't be discouraged if you missed some, or even most, of it. We also saw some pretty different testing scenarios. Most important though was how we were able to relearn something we thought we knew well (IoC) by learning what, to others, is pretty fundamental stuff. You can almost consider IoC a built-in feature of Ruby, much like you'd see LINQ as a built-in feature of C#. Even if you don't understand the nuance of the code or the implications it has on day to day programming, this chapter should still showcase the value of learning and growing.
+Depending on your experience with Ruby and jQuery, this chapter might have been overwhelming. We covered some advanced techniques in languages less familiar to us. We possibly picked the most complicated part of Ruby to look at (metaprogramming), so don't be discouraged if you missed some, or even most of it. We also saw some pretty different testing scenarios. Most important though, was how we were able to relearn something we thought we knew well (IoC) by learning what, to others, is pretty fundamental stuff. You can almost consider IoC a built-in feature of Ruby, much like you'd see LINQ as a built-in feature of C#. Even if you don't understand the nuance of the code or the implications it has on day to day programming, this chapter should still showcase the value of learning and growing.
