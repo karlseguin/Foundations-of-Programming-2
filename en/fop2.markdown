@@ -69,7 +69,7 @@ This snippet is far from perfect. If we specifically look at it from a testing p
 
 A lot of the best practices you hear thrown around, like YAGNI (you aren't going to need it), low coupling and high cohesion can be measured by looking at your code and thinking of how you'd test it. A method that does too much, potentially violating both YAGNI and high cohesion, will require a painful amount of setup code to test (as well as prove easy to break).
 
-There's a programming acronym that gets used a lot called SOLID. It stands for five important principles of object oriented design: single responsibility principle, open/close principle, Liskov substitution principle, Interface segregation principle and dependency inversion principle. These are all topics worthy of their own chapter (there's an ideal), but suffice it to say that most of them are somewhat ambiguous. At what point is a new behavior or enhancement considered an additional responsibility of a given component? When has an interface become too complex? These are important questions and the wrong answer can will have consequences. Testability and experience are the tools you use to remove this ambiguity. (A good place to start to learn more about SOLID is <a href="http://en.wikipedia.org/wiki/Solid_(object-oriented_design)">Wikipedia</a>.)
+There's a programming acronym that gets used a lot called SOLID. It stands for five important principles of object-oriented design: single responsibility principle, open/close principle, Liskov substitution principle, Interface segregation principle and dependency inversion principle. These are all topics worthy of their own chapter (there's an ideal), but suffice it to say that most of them are somewhat ambiguous. At what point is a new behavior or enhancement considered an additional responsibility of a given component? When has an interface become too complex? These are important questions and the wrong answer can will have consequences. Testability and experience are the tools you use to remove this ambiguity. (A good place to start to learn more about SOLID is <a href="http://en.wikipedia.org/wiki/Solid_(object-oriented_design)">Wikipedia</a>.)
 
 ### Efficiency: Not As Simple As It Seems ###
 I might not have sold you on the testability as a quality metric (yet), but I'm confident you agree that quality is a supremely important aspect. Our other pragmatic-driven goal is efficiency, because great code can't wait forever. You'd hope that efficiency, with respect to learning and improving, would be easy to measure: can I achieve XYZ now faster than I could before? This isn't the case. 
@@ -190,12 +190,12 @@ In this chapter we looked at what Inversion of Control is as well as the problem
 ## Chapter 3 - IoC 180&deg; ##
 > "If you do not raise your eyes you will think that you are the highest point" - Antonio Porchia
 
-When you first learn about IoC and start playing with a DI framework, you don't think to yourself *I wonder how else I could resolve dependencies?* Why would you? DI is straightforward as well as being a good fit with how most people organize their Java or .NET code. No one would blame you for thinking, like I did, that this is how everyone does it. It isn't. DI is a pattern suited for object oriented programming with static languages. Switch to a different paradigm and you'll find different solutions.
+When you first learn about IoC and start playing with a DI framework, you don't think to yourself *I wonder how else I could resolve dependencies?* Why would you? DI is straightforward as well as being a good fit with how most people organize their Java or .NET code. No one would blame you for thinking, like I did, that this is how everyone does it. It isn't. DI is a pattern suited for object-oriented programming with static languages. Switch to a different paradigm and you'll find different solutions.
 
 ### Dynamic Mind Shift ###
 It's common for developers to think of dynamic languages and dynamic typing as synonyms. It's true that most (though not all) dynamic languages are dynamically typed. The fact though is that dynamic languages execute many things at runtime, which static languages do at compile time. The implication is that, within a dynamic runtime, developers have greater capabilities at runtime than their static counterparts.
 
-At first such power might seem to be of limited use. After all, how often do you need to change your code at runtime? It seems though, like we often think a feature isn't useful until we have access to it. Consider the features which have been added to C#, before they existed, you possibly didn't even know they could exist. Eventually these additions reshaped how you coded: generics, anonymous methods, LINQ. A dynamic runtime is the same, the impact is difficult to grasp as long as the way you think is constrained by your experience with static languages. Reflection isn't an integral part of your work because it's both limited and cumbersome; yet make it powerful and simple and it might be a tool you leverage on a daily basis. (To be honest, comparing dynamic languages with reflection is hugely unjust to dynamic languages, we're just trying to draw some initial parallels.)
+At first such power might seem to be of limited use. After all, how often do you need to change your code at runtime? As is often the case, we don't know we need something until it's made available to us.  Then we wonder how we ever lived without it. Think of it in terms of the features that have been added to C# over the years: generics, anonymous methods and LINQ (to name a few). A dynamic runtime is the same, the impact is difficult to grasp as long as the way you think is constrained by your experience with static languages. Reflection isn't an integral part of your work because it's both limited and cumbersome; yet make it powerful and simple and it might be a tool you leverage on a daily basis. (To be honest, comparing dynamic languages with reflection is hugely unjust to dynamic languages, we're just trying to draw some initial parallels.)
 
 What does this have to do with Inversion of Control? The flexible nature of dynamic languages means that IoC is built directly into most dynamic languages. There's no need to inject parameters or use a framework, simply leverage the language's capabilities. Let's look at an example:
 
@@ -206,7 +206,7 @@ What does this have to do with Inversion of Control? The flexible nature of dyna
 	  end
 	end
 
-Our code has two dependencies: `first` will access an underlying store (which may not be obvious if you aren't familiar with Ruby) and `Encryptor` is a made-up class responsible for matching a user's hashed password with a supplied password. In a static world both of these would be troublesome. In ruby, and other dynamic languages? Simply change what `first` and `Encryptor` do:
+Our code has two dependencies: `first` will access an underlying store (which may not be obvious if you aren't familiar with Ruby) and `Encryptor` is a made-up class responsible for matching a user's hashed password with a supplied password. In a static world both of these would be troublesome. In Ruby, and other dynamic languages? Simply change what `first` and `Encryptor` do:
 
 	def password_match_returns(expected)
 		metaclass = class << Encryptor; self; end
@@ -235,9 +235,9 @@ In real life you'd use a mocking framework to take care of this and provide a cl
 
 #### Singleton and Metaclasses ####
 
-In C#, Java and most static languages a class can safely be thought of as a rigid template. You define fields and methods and compile your code using classes as an immutable contract. Classes serve a very useful purpose as a design-time tool. The problem with classes, by no fault of their own, is that most programmers think classes and object-oriented programming are one and the same. They aren't. Object orientated programming is, as the name implies, about the living objects of your running code. In a static language this means instances. Since instances are tightly bound to the template defined by their respective class, it's easy to see why developers mix the two concepts.
+In C#, Java and most other static languages a class can safely be thought of as a rigid template. You define fields and methods and compile your code using classes as an immutable contract. Classes serve a very useful purpose as a design-time tool. The problem with classes, by no fault of their own, is that most programmers think classes and object-oriented programming are one and the same. They aren't. Object orientated programming is, as the name implies, about the living objects of your running code. In a static language this means instances. Since instances are tightly bound to the template defined by their respective class, it's easy to see why developers mix the two concepts.
 
-Look beyond static languages though and you'll see a different story: not only is there no law that says  classes cannot themselves be living things, but object oriented programming can happily exist without classes. The best example that you're probably already familiar would be from JavaScript. Behold, OOP without classes:
+Look beyond static languages though and you'll see a different story. Not only is there no law that says  classes cannot themselves be living things, but object-oriented programming can happily exist without classes. The best example that you're probably already familiar would be from JavaScript. Behold, OOP without classes:
 
 	var leto = {
 		fullName: 'Leto Atreides II',
@@ -255,11 +255,11 @@ Look beyond static languages though and you'll see a different story: not only i
 	
 	leto.getAngryWithDuncan(duncan);
 
-As always, the point isn't that one approach is better than another, but rather to gain a different perspective - likely, in this case, on knowledge you already possess. Doing a decade of object oriented programming a certain way is the kind of experience that can compromise your ability to grow.
+As always, the point isn't that one approach is better than another, but rather to gain a different perspective - likely, in this case, on knowledge you already possess. Doing a decade of object-oriented programming a certain way is the kind of experience that can compromise your ability to grow.
 
-So object oriented doesn't *require* classes, but as templates classes are quite handy. This is where ruby and singleton classes come in; because, as we've already mentioned, there's no law that says a class has to be a predefined and unchangeable template.
+So object-oriented doesn't *require* classes, but as templates, classes are quite handy. This is where Ruby and singleton classes come in; because, as we've already mentioned, there's no law that says a class has to be a predefined and unchangeable template.
 
-In ruby every object has its own class, called a singleton class. This lets you define members on specific instances, like:
+In Ruby every object has its own class, called a singleton class. This lets you define members on specific instances, like:
 
 	class Sayan
 		# our class defition for a Sayan
@@ -341,7 +341,7 @@ Singleton classes aren't really something you'll deal with too often, but metacl
 
 The key difference though, between Ruby class methods and Java/C# static methods, is that class methods are defined against a metaclass which is an object. In other words, while class methods resemble static methods, they actually share more in common with instance methods.
 
-What does all this get us? Much of the rigidness you'll bump up against in a static language doesn't exist in dynamic language. Sealed classes, non virtual methods and static methods, which are mechanisms to stop you from doing something, vanish. There are pros and cons to both approaches, but there's no reason not to be familiar with both. 
+What does all this get us? Much of the rigidity you'll bump up against in a static language doesn't exist in a dynamic language. Sealed classes, non virtual methods and static methods, which are mechanisms to stop you from doing something, vanish. There are pros and cons to both approaches, but there's no reason not to be familiar with both. 
 
 I do want to point out that, from a testability perspective, metaprogramming does have significant advantages - the difficulty in testing a static `password_match` method in C# should be proof enough of that. We can't simply overwrite the implementation, as we did at the start of this chapter in Ruby, because classes aren't objects. DI, or even interfaces, simply aren't necessary in Ruby. The decoupling you achieve in C# via injecting interfaces and managing dependencies is replaced by the very nature of the Ruby language. 
 
@@ -350,7 +350,7 @@ Another way to reduce coupling is to leverage events and callbacks. It's been lo
 
 The reason we don't use events everywhere is because they just don't lend themselves to the linear flow we use for most code. However, over the last couple years, this has started to change. Why? The resurgence of JavaScript. We now have more code written in JavaScript and more developers are letting go of their old (generally negative) perceptions and learning the language anew. JavaScript is no longer a place where we can rely on hacks and hope it all keeps working. There's been a shift towards quality and maintainable JavaScript. That means we need to start worrying about coupling, cohesion and testability. When it comes to that, events are to JavaScript what DI is to Java/C# or metaprogramming is to Ruby.
 
-Let's say you're a [jQuery](http://www.jquery.com/) master (if you aren't, you can jump to Appendix A then B to start that journey whenever you want) and have built a series of generic plugins. These are things that we plan on reusing throughout our site. A lot of these plugins will need to interact with each other. For example, one of the plugins turns a simple list of rows into a pageable and sortable grid, and another allows a form to be submitted via ajax. Of course, when the user submits a new record, via the ajax form, the fancy grid needs to be updated. First, let's look at the basic setup:
+Let's say you're a [jQuery](http://www.jquery.com/) master (if you aren't, you can jump to Appendix A then B to start that journey whenever you want) and have built a series of generic plugins. These are things that we plan on reusing throughout our site. A lot of these plugins will need to interact with each other. For example, one of the plugins turns a simple list of rows into a pageable and sortable grid, and another allows a form to be submitted via AJAX. Of course, when the user submits a new record, via the AJAX form, the fancy grid needs to be updated. First, let's look at the basic setup:
 
 	//applies the fancyGrid plugin to the element with an id of users
 	$('#users').fancyGrid();
@@ -388,7 +388,7 @@ The core of our `fancySubmit` plugin will be something as simple as:
 	  };
 	})(jQuery);
 
-(If you aren't familiar with jQuery, this code is intercepting our form's `submit` event in order to submit the data via ajax. The response from that ajax call is then handled by the `handleResponse` function. Again, you might want to skip to Appendix A and B to get up to speed on jQuery.)
+(If you aren't familiar with jQuery, this code is intercepting our form's `submit` event in order to submit the data via AJAX. The response from that AJAX call is then handled by the `handleResponse` function. Again, you might want to skip to Appendix A and B to get up to speed on jQuery.)
 
 `handleResponse` can handle generic cases (errors, validation) directly, but anything more specific will depend on the specific context it's being used in. The solution? Allow a callback to be passed into the plugin and trigger it when appropriate:
 
