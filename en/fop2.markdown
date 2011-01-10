@@ -305,7 +305,7 @@ In Ruby, everything is an object. Even a class is an object (which inherits from
 
 	Sayan.is_a?(Object)
 	=> true
-	Saya.is_a?(Integer)
+	Sayan.is_a?(Integer)
 	=> false
 	Sayan.to_s
 	=> "Sayan"
