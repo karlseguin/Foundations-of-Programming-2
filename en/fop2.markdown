@@ -442,3 +442,139 @@ The introduction of anonymous methods and lambdas make similar code possible, an
 
 ### In This Chapter ###
 Depending on your experience with Ruby and jQuery, this chapter might have been overwhelming. We covered some advanced techniques in languages less familiar to us. We possibly picked the most complicated part of Ruby to look at (metaprogramming), so don't be discouraged if you missed some, or even most of it. We also saw some pretty different testing scenarios. Most important though, was how we were able to relearn something we thought we knew well (IoC) by learning what, to others, is pretty fundamental stuff. You can almost consider IoC a built-in feature of Ruby, much like you'd see LINQ as a built-in feature of C#. Even if you don't understand the nuance of the code or the implications it has on day to day programming, this chapter should still showcase the value of learning and growing.
+
+## Chapter 4 - Testing ##
+ > "Quality is not an act, it is a habit" - Aristotle
+
+So far we've framed the discussion around the idea of testability as a quality metric. Now it's time to look at writing actual tests. There are a number of benefits to writing tests. The most important in my opinion is the impact it has on code quality. I'd easily argue that writing tests is a design exercise since it helps flush out a bunch of anti patterns that make your code unsustainable. Beyond that though, writing tests obviously helps ensure that your code does what its supposed to do, and acts as an important safety neat when you make changes and refactor.
+
+I won't lie to you. Writing effective tests isn't something that happens overnight. It's a long term investment that'll benefit both your code and you. Sometimes it's a pain, or it gets in the way of developing something fast. You don't have to test everything, every unit, every behavior or even every system. However, as a developer, it should be one of the skills you excel at the most. Start today, take the hit in productivity and learn. Learning to write effective tests is, hands down, the single most important piece of advice I could give an aspiring developer.
+
+### Testing Basics ###
+Before we can look at testing best practices, we need to lay down a basic foundation. If this is a newish topic for you, you might have noticed a lot of acronyms, competing ideas and approaches. My own experience says that if you start writing tests today you'll steadily progress to writing effective tests. The journey from learning to mastering is a critical learning process, which you couldn't avoid if you wanted to (regardless of a fancy acronym someone gave a phase). For the rest of this chapter we'll talk about **unit tests**. Unit tests assert the most atomic aspects of your system, be it technical details or behavioral expectations. Unit tests leverage testing framework - our C# examples will use [NUnit](http://www.nunit.org/), our Ruby examples will use [RSpec](http://rspec.info/) and our JavaScript will use [QUnit](http://docs.jquery.com/Qunit). Let's look at our first example:
+
+	#ruby
+	class User
+		def self.passwordIsValid(password, confirmation)
+			return false if password.nil? || password != confirmation
+	
+			return password.length >= 8
+		end
+	end	
+
+(To follow general Ruby guidelines, the above method should probably be named `password_valid?`. However, the trailing question mark was omitted to make the following tests valid in C# and JavaScript - which don't look so kindly on question marks appearing in method names.)
+
+When I look at the above method, which validates that a password is 8 or more characters long and matches a confirmation, I see the opportunity for 4 tests:
+
+	[Test] //C#
+	public void PasswordIsInvalidWhenBlank() 
+	{
+		Assert.IsFalse(User.passwordIsValid(null, "confirmation"), "Password cannot be false");
+	}
+	
+	//javascript
+	test("Password is invalid when it doesn't match the confirmation", function(){
+		equals(User.passwordIsValid("password", "confirmation"), false, "Password must match the confirmation")
+	});
+	
+	#ruby
+	it "Should validate a minimum length" do
+		User.passwordIsValid("1234567", "1234567").should == false
+	end
+	
+	[Test] //C#
+	public void PasswordIsValidWhenItMatchesTheConfirmationAndMeetsTheMinimumLength()
+	{
+		Assert.IsTrue(User.passwordIsValid("12345678", "12345678"));
+		Assert.IsTrue(User.passwordIsValid("a long password should also work!", "a long password should also work!"));
+	}
+
+While the syntax differs, and the available assertion methods will vary, at their core, the libraries are quite similar as is the testing methodology. We started with a trivial example because that's always the right place to start; why burden ourselves with complex examples when all we are trying to do is find our bearings?
+
+There is a point to the above example, besides showing the basic syntax of testing. The point is to help define what a *unit* is when talking about testing. It isn't simply a method, but rather the behaviors that make up a method. Our simple `passwordIsValid` has some technical details which need to be tested (handling a nil/null password) as well as behavior details (what happens when its too short or doesn't match the confirmation). When talking about testability, we are basically talking about how easy each of these units is to test - the above code is simple and consequently easy to test.
+
+### Mocks and Stubs ###
+Let's take a step back from the stubs and mocks we wrote for Ruby and JavaScript back in Chapter 3 and build our knowledge from the ground up. I've read a handful of explanations on *Mocks vs Stubs* and to me it still isn't very clear. I see the two as being similar, with mocks being smarter and mostly about asserting expectations as opposed to stubs which are dumb and used to just get code executing properly. As we write more tests the distinction will hopefully become clearer. For now, let's go back to an example we introduced a few chapters back:
+
+	public class UserRepository : IUserRepository
+	{
+		private IDataStore _store;
+		private IEncryption _encryption;
+		public UserRepository(IDataStore store, IEncryption encryption)
+		{
+			_store = store;
+			_encryption = encryption;
+		}
+	
+		public User FindByCredentials(string username, string password)
+		{
+			var user = _store.FindOneByNamedQuery("FindUserByUserName", new {username = username});
+			if (user == null) { return null; }
+			return _encryption.CheckPassword(user.Password, password) ? user : null;
+		}	
+	}
+
+When we look at the units that make up `FindByCredentials`, we see that:
+
+1. The underlying store is used to find the actual user
+2. Null is returned if the store didn't find a user
+3. Null is returned if the stored password doesn't match the supplied password
+4. The user is returned if the username and password are valid
+
+A common way to test a method with these types of dependencies is to leverage the dependency injection we added to our class and inject mock objects. In the following chapter we'll talk about an alternative approach to mock-heavy code, but making generous use of mock objects is a good place to start your testing journey (especially since it's something that will always be the best approach in many circumstances regardless of what you generally prefer).
+
+We could, if we were truly stubborn, write our own mock objects:
+
+	public class FakeDataStore : IDataStore
+	{
+		public User OnNextCallReturn{get;set;}
+		public User FindOneByNamedQuery(string name, object parameters)
+		{
+			return OnNextCallReturn;
+		}
+	}
+
+Which we could then use in a test, like:
+
+	[Test]
+	public void ReturnsNullIfTheUserIsntFoundInTheStore() 
+	{
+		var store = new FakeDataStore{OnNextCallReturn = null};
+		var repository = new UserRepository(store, null);
+		Assert.IsNull(repository.FindByCredentials("username", "password"));
+	}
+
+It's an interesting example to look at because of how explicit it is with respect to injecting a different and fake dependency, but even in a simple system it's an unsustainable approach and one which waters down the value of our tests. The solution is to use a mocking framework.
+
+### Mocking Frameworks ###
+Mocking frameworks are powerful tools in your testing arsenal. Admittedly, they can be a little tricky to  get used to so we'll try to go over them at a reasonable pace. The purpose behind mocking frameworks is to, in a manner of speaking, automate the creation of our `FakeDataStore` above as well as enhance how our tests interacts with it.  We'll look at an example and work backwards from there. Using a mocking framework, our above test could be rewritten, without the need for our `FakeDataStore`:
+
+	[Test] //using Moq in C#
+	public void ReturnsNullIfTheUserIsntFoundInTheStore() 
+	{
+		var store = A.Fake<IDataStore>();
+		A.CallTo(() => store.FindOneByNamedQuery("FindUserByUserName", new {username = "theUserName"})).Returns(null);
+		var repository = new UserRepository(store, null);
+		Assert.IsNull(repository.FindByCredentials("theUserName", "password"));
+	}
+	
+	#using rspec in Ruby
+	it "returns nil if the user isn't found in the store" do
+		User.shoud_receive(:find_by_username).with('theUserName').and_return(nil)
+		User.find_by_credentials('theUserName', 'password').should be_nils
+	end
+
+(The ruby version is different to account for differences in how the implementation would likely be written, but the idea behind setting up the mock (`User.should_receive...`) is what's important in this example).
+
+What the above code does (and both the C# and Ruby versions do the same thing), is define an expectation with specific parameters and a return value. 
+
+In chapter 3 we saw how this can be achieved in Ruby. A mocking framework, in this case [rspec](http://rspec.info/), can dynamically add the `should_receive` method to the `User` object to make it do whatever it wants. It can actually go a step further and add the `should_receive` method to any object, thus making everything mockable. With this code in place, it isn't a huge leap to record specific parameter expectation and return values.
+
+Depending on how comfortable you are with proxies (more specifically dynamic proxies), the C# implementation may or may not be as straightforward. Since we can't dynamically change the meaning of a method, we rely on injecting interfaces. Interfaces are rigid things. What C# (and Java) mocking libraries do is create a proxy based on an interface. Think of a proxy as an in-memory implementation of the interface. This is what our call to `new Mock<IDataStore>();` does. However, this instance of an `IDataStore` is extremely dumb - call any method on it, and you'll get an exception (you don't expect this magically wired up instance to know how to actually find a user by username do you?) What it does let us do is define expectations and return values. We see this in action when we use the `A.CallTo` method.
+	
+If you are able to wrap your mind around the idea of a temporary, in-memory and quite incomplete implementation of the `IDataStore` then you're on your way to understanding mocking. If it still isn't clear, you should play with some examples. Create mock objects, invoked methods which you haven't setup expectations for or invoke methods using different parameters. The .NET mocking framework being used is [FakeItEasy](http://code.google.com/p/fakeiteasy/). It's relatively new to me, but I enjoy the explicitness of its syntax as well as some of the stubbing features. There are many open source mocking and unit testing frameworks available, use whichever one suits you best.
+
+Most mocking frameworks are actually quite powerful. The above examples is the most common cases, but don't let that fool you. With a good mocking frameworks it's possible to be as strict or as loose as you want. You can, for example, ignore arguments or not care whether particular methods are or aren't called. Or, you can specify ordering and use complex parameter matchers. In the next chapter we'll talk more about these difference approaches to mocking and testing. 
+
+### Conclusion ###
+This chapter focused on the basics of unit testing and mocking. One of the most important things we discussed was exactly what a unit test is. Essentially, we saw how 1 simple method had 4 distinct behavior, each a good candidates for an individual test. We also looked at mocking, which is both a powerful and complicated tool. If it still isn't clear, maybe because of the somewhat odd syntax, go back and look at the manual approach that we took. It's more important to understand the concept of mocking in general than the implementation of the mocking frameworks. That said, understanding proxying in a static language is an important concept, you'll run into it everywhere and probably even want to take advantage of it yourself.
