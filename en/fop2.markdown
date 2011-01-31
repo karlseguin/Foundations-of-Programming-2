@@ -576,5 +576,5 @@ If you are able to wrap your mind around the idea of a temporary, in-memory and 
 
 Most mocking frameworks are actually quite powerful. The above examples is the most common cases, but don't let that fool you. With a good mocking frameworks it's possible to be as strict or as loose as you want. You can, for example, ignore arguments or not care whether particular methods are or aren't called. Or, you can specify ordering and use complex parameter matchers. In the next chapter we'll talk more about these difference approaches to mocking and testing. 
 
-### Conclusion ###
+### In This Chapter ###
 This chapter focused on the basics of unit testing and mocking. One of the most important things we discussed was exactly what a unit test is. Essentially, we saw how 1 simple method had 4 distinct behavior, each a good candidates for an individual test. We also looked at mocking, which is both a powerful and complicated tool. If it still isn't clear, maybe because of the somewhat odd syntax, go back and look at the manual approach that we took. It's more important to understand the concept of mocking in general than the implementation of the mocking frameworks. That said, understanding proxying in a static language is an important concept, you'll run into it everywhere and probably even want to take advantage of it yourself.
