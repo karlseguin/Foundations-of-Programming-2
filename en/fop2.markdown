@@ -549,7 +549,7 @@ It's an interesting example to look at because of how explicit it is with respec
 ### Mocking Frameworks ###
 Mocking frameworks are powerful tools in your testing arsenal. Admittedly, they can be a little tricky to  get used to so we'll try to go over them at a reasonable pace. The purpose behind mocking frameworks is to, in a manner of speaking, automate the creation of our `FakeDataStore` above as well as enhance how our tests interacts with it.  We'll look at an example and work backwards from there. Using a mocking framework, our above test could be rewritten, without the need for our `FakeDataStore`:
 
-	[Test] //using Moq in C#
+	[Test] //using FakeItEasy in C#
 	public void ReturnsNullIfTheUserIsntFoundInTheStore() 
 	{
 		var store = A.Fake<IDataStore>();
