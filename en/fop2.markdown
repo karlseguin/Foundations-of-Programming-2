@@ -448,7 +448,7 @@ Depending on your experience with Ruby and jQuery, this chapter might have been 
 
 So far we've framed the discussion around the idea of testability as a quality metric. Now it's time to look at writing actual tests. There are a number of benefits to writing tests. The most important, in my opinion, is the impact on code quality. I'd easily argue that writing tests is a design exercise since it helps flush out a bunch of anti-patterns that make your code unsustainable. Beyond that, writing tests  helps ensure that your code does what it's supposed to do, and acts as an important safety net when you make changes.
 
-I won't lie to you. Writing effective tests isn't something that happens overnight. It's a long-term investment that'll benefit both your code and you. It can be a pain, both as you get started and even when you are experienced. It will slow you down at first, but even on your first attempt the benefits should outweigh the costs. Remember though, you don't have to test everything. Start with the most critical parts of your system. As a developer, being effective at unit testing should be one of the skills you excel at. Start today, take the hit in productivity and learn. Learning to write effective tests is, hands down, the single most important piece of advice I could give an aspiring developer.
+I won't lie to you. Writing effective tests isn't something that happens overnight. It's a long-term investment that'll benefit both your code and you. It can be a pain, both as you get started and even when you are experienced. It will slow you down at first, but even on your first attempt the benefits will outweigh the costs. Remember though, you don't have to test everything. Start with the most critical parts of your system. As a developer, being effective at unit testing should be one of the skills you excel at. Start today, take the hit in productivity and learn. Learning to write effective tests is, hands down, the single most important piece of advice I could give an aspiring developer.
 
 ### Testing Basics ###
 Before we can look at testing best practices, we need to lay down a basic foundation. If this is a newish topic for you, you might have noticed a lot of acronyms, competing ideas and approaches. My own experience says that if you start writing tests today you'll steadily progress to writing effective tests. The journey from learning to mastering is a critical learning process, which you couldn't avoid if you wanted to (regardless of a fancy acronym someone gave a phase). For the rest of this chapter we'll talk about **unit tests**. Unit tests assert the most atomic aspects of your system, be it technical details or behavioral expectations. Unit tests leverage a testing framework. Our C# examples will use [NUnit](http://www.nunit.org/), our Ruby examples will use [RSpec](http://rspec.info/) and our JavaScript will use [QUnit](http://docs.jquery.com/Qunit). Let's look at our first example:
@@ -578,3 +578,238 @@ Most mocking frameworks are actually quite powerful. The above examples are the 
 
 ### In This Chapter ###
 This chapter focused on the basics of unit testing and mocking. One of the most important things we discussed was exactly what a unit test is. Essentially, we saw how one simple method had four distinct behavior, each a good candidate for an individual test. We also looked at mocking, which is both a powerful and complicated tool. If it still isn't clear, maybe because of the somewhat odd syntax, go back and look at the manual approach that we took. It's more important to understand the concept of mocking in general than the implementation of the mocking frameworks. That said, understanding proxying in a static language is an important concept; you'll run into it everywhere and probably even want to take advantage of it yourself.
+
+## Chapter 5 - Effective Testing ##
+ > "A fool with a tool is still a fool." - Grady Booch
+
+I've mentioned that the path to writing effective tests is as important as testing itself. I feel this way because of my own experience. I'm sure I'll continue to sharpen my skill, but after a few years I feel that I have become effective at writing tests. During those years, I tested too much, not enough, wrote brittle tests, wrote integration tests disguised as unit tests and unit tests disguised as integration tests. As I progressed, largely by trying to correct things that didn't feel right from previous attempts, I learnt a lot about writing good code (not just good tests).
+
+Despite the lessons learned from the journey, there's no doubt that, at times, it was a frustrating process. I realized that a lot of material focuses on introducing unit testing (much like chapter 4), but little went beyond that. The journey is important but we can do more than point you to the starting line.
+
+## Brittleness ##
+A good place to start is to explain *what is an effective test?* At a high level I consider an effective test one which is explicit and not brittle.
+
+We could simply define a brittle test as one which fails often, but that isn't quite right. A test should only be considered brittle, which is bad, when it fails due to unrelated changes. As you make changes to your code, you should have a good idea of which tests it'll break and which it won't. But you do want tests to break! There's nothing worse than having a bunch of unit tests, making a change to your code, expecting one of more tests to fail, yet everything still passes.
+
+Let's look at some properties of good tests which help reduce brittleness.
+
+### Tests should be fast ###
+
+Before we look at anything else, your tests need to be fast. This might seem like an odd thing to start with, but slow tests are nearly worthless. The best way we have to identify brittle tests is to run our tests often as we make changes. It's generally a sign that something's wrong when small changes break a lot of tests. When you only run your tests after making large/numerous changes, it becomes harder to tell whether a test is brittle or not. Running our tests often is paramount to identifying and resolving brittle tests. Having quick tests is paramount to running them often.
+
+I don't have any hard rules on how often you should run your tests, or how long your tests will take. I can tell you that there's a direct relation between the two - the quicker your tests, the more likely you are to run them often. I can also tell you that a test that takes a second is a long test.
+
+You might have a group of tests that run noticeably slower. Integration test and UI test are common culprits. It can be useful to separate these from your faster unit tests so that each group can be run independently. However, even in these cases, work should be done to improve the speed - headless UI testing with [Zombie](http://zombie.labnotes.org/) or [Capybara](https://github.com/jnicklas/capybara) as well as testing against in-memory databases like [SQLite](http://www.sqlite.org/) can have significant advantages.
+
+
+### Tests should be focused ###
+
+If you don't want to spend all your time maintaining your tests, you'll want to make sure that each one verifies a specific behavior. In chapter 4 we saw how our small `passwordIsValid` method was covered by four distinct tests. This doesn't only make our code easier to read and write, but it also helps us quickly resolve a broken test and move on. Small and focused tests take seconds to fix. 
+
+You'll often write a test and assert something, only to be tempted to assert something else. You'll think to yourself *Well, I've set this all up and everything, what's the harm in checking this one other thing?*. The harm is that you're test can now break for two separate reasons which aren't really connected. That doesn't mean you should only have one `Assert`, but you do need to be careful about asserting too much.
+
+I have a quick way to tell whether a test is doing too much: when I name the test, am I tempted to use the word *and* or *or*? If we combined two of our tests from chapter 4 into a single one, such as:
+
+	it "should be invalid when the password is blank or it doesn't match the confirmation" do
+	  ...
+	end
+
+It'd be a sure sign that our test is doing too much.
+
+There's another advantage to writing focused tests: it helps flush out methods which themselves do too much. If you're trying to write a test, but you realize that you're having to setup numerous expectations, mock objects, dependencies and so on, then your problem isn't with your test, it's with your code. Remember, cohesive code is fundamental to good design, and tests that require a lot of setup are always indicators of poor cohesion.
+
+The [Law of Demeter](http://en.wikipedia.org/wiki/Law_of_Demeter) is a particularly relevant design guideline worth familiarizing yourself with. The general idea is that code shouldn't reach outside of what's immediately available. For example, if a method takes a `user` parameter, it can safely access `user.IsValid()`, but reaching deeper into `user` by calling `user.GetRole().CanUpdateSite()` starts to get dangerous. For me, this is one of those *rules* which I find hard to visualize or even understand. Until I write a test that is, then it becomes painfully evident that something isn't right. You can often even fix the code under test by looking at your test and saying *this is how I should be able to test this*. Of course, this is core to what we've been talking about since the start: testing is a means to drive proper design.
+
+As you write more tests and code, you'll notice, by the difficulty in writing clean tests, other patterns emerge. For example, you'll learn to hate anything but simple assignments in your constructors (as you should!). 
+
+### Tests should be meaningful ###
+
+At first this might sound silly, but I think it's common for developers new to testing to test too much. Test code that can break. Simple getters, setters and constructors? Forget about them. 
+
+This brings up the topic of code coverage. Code coverage is the amount (normally as a percentage) of your code which is *covered* by your tests. Code coverage tools run your tests and figure out if a line of code has been executed or not. These tools tend to do one thing very well, and one thing very poorly. They are great for telling you when code hasn't been executed. If a line hasn't been executed, then it's a safe bet you don't have any tests for it (which, again, might not be a huge deal if it's code that can't break, like a simple getter). However, they are horrible at telling you if your coverage is meaningful. Just because your test passes over a piece of code doesn't mean you are actually doing anything meaningful.
+
+This test will give us 100% coverage, but doesn't actually do anything (and this isn't just about missing assertions, code can easily be *covered* and asserting in a meaningless way)
+
+	public static int Add(int a, int b)
+	{
+	  return a + b;
+	}
+	
+	[Test]
+	public void ItAddsTheNumbers()
+	{
+	  Add(1, 2);
+	}
+
+### Tests shouldn't care about implementation details  ###
+
+This is one of the trickier things to get right. Unlike the other rules, there'll be a lot of times when you won't want to follow it. More often than not though, it's good advice. The idea is that most of your tests shouldn't care too much about how something is implemented.
+
+The first example, which always gets asked, is: don't test private methods. If you properly test your public interface, your private implementation will get properly covered. It's really that simple. As far as your test is concerned, imagine that the private method is actually inlined within the code you are testing.
+
+A less common example is inheritance. When you are testing a class which inherits from another class, pretend that it doesn't. Inheritance being used to avoid duplication is a detail which is irrelevant to the behavior you are testing. Yes, this means that you'll end up duplicating tests for the `manager.HasTooManyVacationDays()` and the `employee.HasTooManyVacationDays()`, but it will result in less brittle and more readable tests.
+
+## A Heart to Heart about Stubs and Mocks ##
+
+The first time unit testing clicks for most people is when they start to use a mocking framework. Without such frameworks, testing is impractical. Mocking frameworks enable you to achieve two things. The first
+is that they let you focus on behaviors without having to worry about implementation details. The second is that they let you test the interactions between your dependent objects. Combine these two benefits together and you get code which does what it's supposed to at an individual behavior level and as a complex system.  If X and Y work individually, and X's is properly integrated with Y, then things are looking good.
+
+Unfortunately, people go overboard. They rely too heavily on mocks and focus too much on the integration of their components. It's probably the exact opposite of what you've been told, but mock objects can actually increase the coupling within your tests and with it their brittleness. Let's look at an example method:
+
+	public User FindByEmail(string email)
+	{
+		var user = _store.FindOneByNamedQuery("FindByEmail", new {email = email});
+		return user != null && user.Status == UserStatus.Active ? user : null;
+	}
+
+Something we'll want to test is that `null` is returned if the user's `Status` isn't `Active`:
+
+	[Test]
+	public void ReturnsNullWhenTheUserIsntActive()
+	{
+		var store = A.Fake<IDataStore>();
+		A.CallTo(() => store.FindOneByNamedQuery("FindByEmail", new {email = "fake@email.com"})).Returns(new User{Status = UserStatus.Disabled});
+		var repository = new UserRepository(store);
+		Assert.IsNull(repository.FindByEmail("fake@email.com"));
+	}
+
+It's a simple test, but if you look closely you should see two separate things being tested. Don't see it? Answer this question: what happens if we change the name of the query from *FindByEmail* to *FindUserByEmail?* Answer: the test will fail. Here's the more important question: *should it?* Answer: no. This specific test really shouldn't care about the persistence details, all it cares about is that a user with an invalid status is returned as `null`.
+
+There are two alternatives approaches to the above test. First, most mocking frameworks can behave more like stubs (dumb mocks). So we could rewrite our above expectation as:
+
+		A.CallTo(() => store.FindoneByNamedQuery(null, null)).WithAnyArguments().Returns(new User{Status = UserStatus.Disabled});
+		
+		//or, even better:
+		Any.CallTo(store).WithReturnType<User>().Returns(new User{Status = UserStatus.Disabled});
+
+This first approach is a step in the right direction. The examples become increasingly ignorant about the implementation details and therefore become more robust to changes.
+
+The second approach is to rely on the real implementation. Given a proper setup, our test can be turned into to:
+
+	[Test]
+	public void ReturnsNullWhenTheUserIsntActive()
+	{
+	  var user = new UserRepository(new SqlDataStore()).FindByEmail("invaliduser@email.com");
+		Assert.IsNull(user);
+	}
+
+(this *is* an over-simplification, because you really do need to set it up properly)
+
+These are all complementary approaches. I've come to the opinion that they must all be leveraged in order to have effective tests. If you are new to testing, avoid the pitfall of leaning too heavily on overly specific mocks.
+
+### My Current Rhythm ###
+
+Let's go back to an old example and test it using what we just learnt. First, the method:
+
+	public User FindByCredentials(string username, string password)
+	{
+		var user = _store.FindOneByNamedQuery("FindUserByUserName", new {username = username});
+		if (user == null) { return null; }
+		return _encryption.CheckPassword(user.Password, password) ? user : null;
+	}
+
+First we'll verify the behavior:
+
+	[Test]
+	public void ReturnsNullWhenTheUserDoesntExist()
+	{
+	  var store = A.Fake<IDataStore>();
+	  
+	  Any.CallTo(store).WithReturnType<User>().Returns(null);
+	  var user = new UserRepository(store, null).FindByCredentials("a", "b");
+	  
+	  Assert.IsNull(user)
+	}
+	
+	[Test]
+	public void ReturnsNullIfThePasswordsDontMatch()
+	{
+	  var store = A.Fake<IDataStore>();
+	  var encryption = A.Fake<IEncryption>();
+	  
+	  Any.CallTo(store).WithReturnType<User>().Returns(new User());
+	  Any.CallTo(encryption).WithReturnType<bool>().Returns(false);
+	  var user = new UserRepository(store, encryption).FindByCredentials("a", "b");
+	  
+	  Assert.IsNull(user)	  
+	}
+	
+	[Test]
+	public void ReturnTheValidUser()
+	{
+	  var store = A.Fake<IDataStore>();
+	  var encryption = A.Fake<IEncryption>();
+	  var expected = new User();
+	  
+	  Any.CallTo(store).WithReturnType<User>().Returns(expected);
+	  Any.CallTo(encryption).WithReturnType<bool>().Returns(true);
+	  var user = new UserRepository(store, encryption).FindByCredentials("a", "b");
+	  
+	  Assert.AreSame(expected, user);
+	}
+
+Know that we are specifying the return type via `WithReturnType<T>()` due to limitations of static languages - if I could, I'd get rid of it.
+  
+Next we'll write tests to specifically verity that our class properly interacts with it's dependencies:
+
+ 	[Test]
+	public void LoadsTheUserFromTheDataStore()
+	{
+	  var store = A.Fake<IDataStore>();
+    new UserRepository(store, A.Fake<IEncryption>()).FindByCredentials("a", "b");
+	  A.CallTo(() => store.FindOneByNamedQuery("FindUserByUserName", new {username = "a"})).MustHaveHappened();  
+	}
+	
+	[Test]
+	public void VerifiesTheSubmittedPasswordAgainstTheStoredOne() 
+	{
+	  var store = A.Fake<IDataStore>();
+	  var encryption = A.Fake<IEncryption>();
+    var user = new User{Passowrd = "admin"};
+    
+	  Any.CallTo(store).WithReturnType<User>().Returns(user);
+    new UserRepository(store, encryption).FindByCredentials("a", "b");
+    
+	  A.CallTo(() => encryption.CheckPassword("admin", "b"))).MustHaveHappened();  
+	}
+
+The goal is to make each test as specific as possible while reducing any knowledge of anything which isn't necessary. Not only are the behavioral tests reasonably isolated from the implementation, but they are decently isolated from each other. This is also true of our interaction tests.
+
+
+### About Hitting The Database ###
+
+Our above examples opted to leverage stubs instead of relying on the actual implementations. Using the actual encryption implementation would have been trivial, but using a real data store would have required additional planning. I think you should seriously consider hitting a real database/service in some of your tests. For some tests and components it will just make the most sense, and beyond that it provides an extra layer of sanity checks. 
+
+We won't cover how to do this in any detail. It should be straightforward to implement. There are a lot of different ways to do this. Some people like to use a lightweight database, potentially even with in-memory capabilities (like SQLite). Others keep an existing database and simply truncate all the tables before each test (most databases have a way to programmatically do this). Or you can drop your tables and re-create them. It's partially a matter of preference. It can also vary based on your specific case.
+
+I can say that I generally drop all the tables and re-create them before each test (you should have your create statement all written out anyways!). There are a couple reasons not to drop your tables after each test. First, if a test fails you won't be able to see your data. Secondly, if something goes wrong, it's more likely to have a negative impact on the following test.
+
+Just don't be afraid to try.
+
+### Equality, Identity and Tests ###
+
+I've written many tests which made unnecessary assumptions about the implementation of my code with respect to identify and equality. Many times it's important to make the distinction, but just as often it isn't.
+
+One of the tests we just wrote made such as an assumption, here it is again:
+
+	[Test]
+	public void ReturnTheValidUser()
+	{
+	  var store = A.Fake<IDataStore>();
+	  var encryption = A.Fake<IEncryption>();
+	  var expected = new User();
+	  
+	  Any.CallTo(store).WithReturnType<User>().Returns(expected);
+	  Any.CallTo(encryption).WithReturnType<bool>().Returns(true);
+	  var user = new UserRepository(store, encryption).FindByCredentials("a", "b");
+	  
+	  Assert.AreSame(expected, user);
+	}
+
+Our test is assuming that our class will return the same instance which our store returned. To be honest, this is probably a safe assumption. It's quite benign and I'd probably keep it like it is. I nonetheless wanted to point it out as an assumption that may or may not be desired or safe.
+
+A similar case which I have a stronger opinion about are collection parameters to dependencies. Unless you have specific reason to, you are almost always better off doing a value check of the items within the collection. This is especially true in a Linq-enabled world where new collection instances might be generated (filtered/mapped/etc) from a supplied parameter.
+
+# In This Chapter #
+
+The focus of this chapter was on writing effective unit tests. While we covered a few high level topics, such as performance, the real intent was to look at mocking in greater detail. I do think using mock's as a crutch is a common and serious problem. They are tremendously useful and you should use them, just don't mix them up with your behavioral tests. Thankfully most mocking frameworks can generate exactly the kind of stub we're interested in. Furthermore, don't shy away from playing around with unit tests which border on integration tests. Once you have the code to properly set things up, they are quick to write and provide some of your most important coverage.
