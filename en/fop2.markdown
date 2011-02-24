@@ -589,13 +589,13 @@ Despite the lessons learned from the journey, there's no doubt that, at times, i
 ## Brittleness ##
 A good place to start is to explain *what is an effective test?* At a high level I consider an effective test one which is explicit and not brittle.
 
-We could simply define a brittle test as one which fails often, but that isn't quite right. A test should only be considered brittle, which is bad, when it fails due to unrelated changes. As you make changes to your code, you should have a good idea of which tests it'll break and which it won't. But you do want tests to break! There's nothing worse than having a bunch of unit tests, making a change to your code, expecting one of more tests to fail, yet everything still passes.
+We could simply define a brittle test as one which fails often, but that isn't quite right. A test should only be considered brittle, which is bad, when it fails due to unrelated changes. As you make changes to your code, which tests will break the code and which ones won't. But you do want tests to break! There's nothing worse than having a bunch of unit tests, making a change to your code, expecting one of more tests to fail, yet everything still passes.
 
 Let's look at some properties of good tests which help reduce brittleness.
 
 ### Tests should be fast ###
 
-Before we look at anything else, your tests need to be fast. This might seem like an odd thing to start with, but slow tests are nearly worthless. The best way we have to identify brittle tests is to run our tests often as we make changes. It's generally a sign that something's wrong when small changes break a lot of tests. When you only run your tests after making large/numerous changes, it becomes harder to tell whether a test is brittle or not. Running our tests often is paramount to identifying and resolving brittle tests. Having quick tests is paramount to running them often.
+Before we look at anything else, your tests need to be fast. This might seem like an odd thing to start with, but slow tests are nearly worthless. The best way we have to identify brittle tests, is to run our tests often as we make changes. It's generally a sign that something's wrong when small changes break a lot of tests. When you only run your tests after making large/numerous changes, it becomes harder to tell whether a test is brittle or not. Running our tests often is paramount to identifying and resolving brittle tests. Having quick tests is paramount to running them often.
 
 I don't have any hard rules on how often you should run your tests, or how long your tests will take. I can tell you that there's a direct relation between the two - the quicker your tests, the more likely you are to run them often. I can also tell you that a test that takes a second is a long test.
 
@@ -643,7 +643,7 @@ This test will give us 100% coverage, but doesn't actually do anything (and this
 
 ### Tests shouldn't care about implementation details  ###
 
-This is one of the trickier things to get right. Unlike the other rules, there'll be a lot of times when you won't want to follow it. More often than not though, it's good advice. The idea is that most of your tests shouldn't care too much about how something is implemented.
+This is one of the trickiest things to get right. Unlike the other rules, there'll be a lot of times when you won't want to follow it. More often than not though, it's good advice. The idea is that most of your tests shouldn't care too much about how something is implemented.
 
 The first example, which always gets asked, is: don't test private methods. If you properly test your public interface, your private implementation will get properly covered. It's really that simple. As far as your test is concerned, imagine that the private method is actually inlined within the code you are testing.
 
@@ -652,7 +652,7 @@ A less common example is inheritance. When you are testing a class which inherit
 ## A Heart to Heart about Stubs and Mocks ##
 
 The first time unit testing clicks for most people is when they start to use a mocking framework. Without such frameworks, testing is impractical. Mocking frameworks enable you to achieve two things. The first
-is that they let you focus on behaviors without having to worry about implementation details. The second is that they let you test the interactions between your dependent objects. Combine these two benefits together and you get code which does what it's supposed to at an individual behavior level and as a complex system.  If X and Y work individually, and X's is properly integrated with Y, then things are looking good.
+is that they let you focus on behaviors without having to worry about implementation details. The second is that they let you test the interactions between your dependent objects. Combine these two benefits together and you get code which does what it's supposed to at an individual behavior level and as a complex system.  If X and Y work individually, and Xs is properly integrated with Y, then things are looking good.
 
 Unfortunately, people go overboard. They rely too heavily on mocks and focus too much on the integration of their components. It's probably the exact opposite of what you've been told, but mock objects can actually increase the coupling within your tests and with it their brittleness. Let's look at an example method:
 
@@ -773,8 +773,7 @@ Next we'll write tests to specifically verify that our class properly interacts 
 	  A.CallTo(() => encryption.CheckPassword("admin", "b"))).MustHaveHappened();  
 	}
 
-The goal is to make each test as specific as possible while reducing any knowledge of anything which isn't necessary. Not only are the behavioral tests reasonably isolated from the implementation, but they are decently isolated from each other. This is also true of our interaction tests.
-
+The goal is to make each test as specific as possible while reducing any knowledge of anything which isn't necessary. Not only are the behavioral tests reasonably isolated from the implementation, but they are decently isolated from each other. This is also true of our interaction tests. Rather than breaking three over-burdened tests, a change to our implementation is likely to break a single test. It's as much a matter of how many tests can you isolate from such changes (or, put another way, what is the minimum number of tests you can expose) as well as how easy it is to repair the tests that must break.
 
 ### About Hitting The Database ###
 
@@ -808,7 +807,7 @@ One of the tests we just wrote made such as an assumption, here it is again:
 
 Our test is assuming that our class will return the same instance which our store returned. To be honest, this is probably a safe assumption. It's quite benign and I'd probably keep it like it is. I nonetheless wanted to point it out as an assumption that may or may not be desired or safe.
 
-A similar case which I have a stronger opinion about are collection parameters to dependencies. Unless you have specific reason to, you are almost always better off doing a value check of the items within the collection. This is especially true in a Linq-enabled world where new collection instances might be generated (filtered/mapped/etc) from a supplied parameter.
+I have a strong opinion about collection parameters to dependencies. Unless you have specific reason to, you are almost always better off doing a value check of the items within the collection. This is especially true in a Linq-enabled world where new collection instances might be generated (filtered/mapped/etc) from a supplied parameter.
 
 # In This Chapter #
 
