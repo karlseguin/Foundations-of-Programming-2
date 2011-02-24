@@ -606,7 +606,7 @@ You might have a group of tests that run noticeably slower. Integration test and
 
 If you don't want to spend all your time maintaining your tests, you'll want to make sure that each one verifies a specific behavior. In chapter 4 we saw how our small `passwordIsValid` method was covered by four distinct tests. This doesn't only make our code easier to read and write, but it also helps us quickly resolve a broken test and move on. Small and focused tests take seconds to fix. 
 
-You'll often write a test and assert something, only to be tempted to assert something else. You'll think to yourself *Well, I've set this all up and everything, what's the harm in checking this one other thing?*. The harm is that you're test can now break for two separate reasons which aren't really connected. That doesn't mean you should only have one `Assert`, but you do need to be careful about asserting too much.
+You'll often write a test and assert something, only to be tempted to assert something else. You'll think to yourself *Well, I've set this all up and everything, what's the harm in checking this one other thing?*. The harm is that your test can now break for two separate reasons which aren't really connected. That doesn't mean you should only have one `Assert`, but you do need to be careful about asserting too much.
 
 I have a quick way to tell whether a test is doing too much: when I name the test, am I tempted to use the word *and* or *or*? If we combined two of our tests from chapter 4 into a single one, such as:
 
