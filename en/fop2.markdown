@@ -750,7 +750,7 @@ First we'll verify the behavior:
 
 Know that we are specifying the return type via `WithReturnType<T>()` due to limitations of static languages - if I could, I'd get rid of it.
   
-Next we'll write tests to specifically verity that our class properly interacts with it's dependencies:
+Next we'll write tests to specifically verify that our class properly interacts with it's dependencies:
 
  	[Test]
 	public void LoadsTheUserFromTheDataStore()
@@ -788,7 +788,7 @@ Just don't be afraid to try.
 
 ### Equality, Identity and Tests ###
 
-I've written many tests which made unnecessary assumptions about the implementation of my code with respect to identify and equality. Many times it's important to make the distinction, but just as often it isn't.
+I've written many tests which made unnecessary assumptions about the implementation of my code with respect to identity and equality. Many times it's important to make the distinction, but just as often it isn't.
 
 One of the tests we just wrote made such as an assumption, here it is again:
 
@@ -812,4 +812,4 @@ A similar case which I have a stronger opinion about are collection parameters t
 
 # In This Chapter #
 
-The focus of this chapter was on writing effective unit tests. While we covered a few high level topics, such as performance, the real intent was to look at mocking in greater detail. I do think using mock's as a crutch is a common and serious problem. They are tremendously useful and you should use them, just don't mix them up with your behavioral tests. Thankfully most mocking frameworks can generate exactly the kind of stub we're interested in. Furthermore, don't shy away from playing around with unit tests which border on integration tests. Once you have the code to properly set things up, they are quick to write and provide some of your most important coverage.
+The focus of this chapter was on writing effective unit tests. While we covered a few high level topics, such as performance, the real intent was to look at mocking in greater detail. I do think using mocks as a crutch is a common and serious problem. They are tremendously useful and you should use them, just don't mix them up with your behavioral tests. Thankfully most mocking frameworks can generate exactly the kind of stub we're interested in. Furthermore, don't shy away from playing around with unit tests which border on integration tests. Once you have the code to properly set things up, they are quick to write and provide some of your most important coverage.
