@@ -589,7 +589,7 @@ Despite the lessons learned from the journey, there's no doubt that, at times, i
 ## Brittleness ##
 A good place to start is to explain *what is an effective test?* At a high level I consider an effective test one which is explicit and not brittle.
 
-We could simply define a brittle test as one which fails often, but that isn't quite right. A test should only be considered brittle, which is bad, when it fails due to unrelated changes. As you make changes to your code, which tests will break the code and which ones won't. But you do want tests to break! There's nothing worse than having a bunch of unit tests, making a change to your code, expecting one of more tests to fail, yet everything still passes.
+We could simply define a brittle test as one which fails often, but that isn't quite right. A test should only be considered brittle, which is bad, when it fails due to unrelated changes. As you make changes to your code, which tests will break the code and which ones won't. But you do want tests to break! There's nothing worse than having a bunch of unit tests, making a change to your code, expecting one or more tests to fail, yet everything still passes.
 
 Let's look at some properties of good tests which help reduce brittleness.
 
@@ -597,16 +597,18 @@ Let's look at some properties of good tests which help reduce brittleness.
 
 Before we look at anything else, your tests need to be fast. This might seem like an odd thing to start with, but slow tests are nearly worthless. The best way we have to identify brittle tests, is to run our tests often as we make changes. It's generally a sign that something's wrong when small changes break a lot of tests. When you only run your tests after making large/numerous changes, it becomes harder to tell whether a test is brittle or not. Running our tests often is paramount to identifying and resolving brittle tests. Having quick tests is paramount to running them often.
 
-I don't have any hard rules on how often you should run your tests, or how long your tests will take. I can tell you that there's a direct relation between the two - the quicker your tests, the more likely you are to run them often. I can also tell you that a test that takes a second is a long test.
+I don't have any hard rules on how often you should run your tests, or how long your tests should take to run. I can tell you that there's a direct relation between the two - the quicker your tests, the more likely you are to run them often. I can also tell you that a test that takes a second is a long test.
 
-You might have a group of tests that run noticeably slower. Integration test and UI test are common culprits. It can be useful to separate these from your faster unit tests so that each group can be run independently. However, even in these cases, work should be done to improve the speed - headless UI testing with [Zombie](http://zombie.labnotes.org/) or [Capybara](https://github.com/jnicklas/capybara) as well as testing against in-memory databases like [SQLite](http://www.sqlite.org/) can have significant advantages.
+You might have a group of tests that run noticeably slower. Integration tests and UI tests are common culprits. It can be useful to separate these from your faster unit tests so that each group can be run independently. However, even in these cases, work should be done to improve the speed - headless UI testing with [Zombie](http://zombie.labnotes.org/) or [Capybara](https://github.com/jnicklas/capybara) as well as testing against in-memory databases like [SQLite](http://www.sqlite.org/) can have significant advantages. 
+
+(Traditional UI testing requires that you load the GUI and simulate user actions. For example, many websites make use [Selenium](http://seleniumhq.org/) to drive this simulation through a real browser. While such testing can be very realistic, it also tends to be slow. Headless testing on the other hand does UI testing without loading the actual GUI client. For websites, headless frameworks let you test against the rendered HTML, say by asserting that a button with an `id` of `login` exists and clicking it logs the user in. All of this can happen without ever loading an actual browser. These tests tend to be much faster and in my opinion are always worth the tradeoff in less realism. To be honest, testing with tools such as Selenium feels to me like you are testing the browser more than your own code. Of course, given the current state of web browsers, that isn't always a bad thing.)
 
 
 ### Tests should be focused ###
 
-If you don't want to spend all your time maintaining your tests, you'll want to make sure that each one verifies a specific behavior. In chapter 4 we saw how our small `passwordIsValid` method was covered by four distinct tests. This doesn't only make our code easier to read and write, but it also helps us quickly resolve a broken test and move on. Small and focused tests take seconds to fix. 
+If you don't want to spend all your time maintaining your tests, you'll want to make sure that each one verifies a specific behavior. In chapter 4 we saw how our small `passwordIsValid` method was covered by four distinct tests. This not only makes our code easier to read and write, but it also helps us quickly resolve a broken test and move on. Small and focused tests take seconds to fix. 
 
-You'll often write a test and assert something, only to be tempted to assert something else. You'll think to yourself *Well, I've set this all up and everything, what's the harm in checking this one other thing?*. The harm is that your test can now break for two separate reasons which aren't really connected. That doesn't mean you should only have one `Assert`, but you do need to be careful about asserting too much.
+You'll often write a test and assert something, only to be tempted to assert something else. You'll think to yourself *Well, I've set this all up and everything, what's the harm in checking this one other thing?*. The harm is that your test can now break for two completely different reasons. That doesn't mean you should only have one `Assert`, but you do need to be careful about asserting too much.
 
 I have a quick way to tell whether a test is doing too much: when I name the test, am I tempted to use the word *and* or *or*? If we combined two of our tests from chapter 4 into a single one, such as:
 
@@ -618,9 +620,9 @@ It'd be a sure sign that our test is doing too much.
 
 There's another advantage to writing focused tests: it helps flush out methods which themselves do too much. If you're trying to write a test, but you realize that you're having to setup numerous expectations, mock objects, dependencies and so on, then your problem isn't with your test, it's with your code. Remember, cohesive code is fundamental to good design, and tests that require a lot of setup are always indicators of poor cohesion.
 
-The [Law of Demeter](http://en.wikipedia.org/wiki/Law_of_Demeter) is a particularly relevant design guideline worth familiarizing yourself with. The general idea is that code shouldn't reach outside of what's immediately available. For example, if a method takes a `user` parameter, it can safely access `user.IsValid()`, but reaching deeper into `user` by calling `user.GetRole().CanUpdateSite()` starts to get dangerous. For me, this is one of those *rules* which I find hard to visualize or even understand. Until I write a test that is, then it becomes painfully evident that something isn't right. You can often even fix the code under test by looking at your test and saying *this is how I should be able to test this*. Of course, this is core to what we've been talking about since the start: testing is a means to drive proper design.
+The [Law of Demeter](http://en.wikipedia.org/wiki/Law_of_Demeter) and [Tell, Don't Ask](http://pragprog.com/articles/tell-dont-ask) are particularly relevant design guideline worth familiarizing yourself with. The general idea is that code shouldn't reach outside of what's immediately available. For example, if a method takes a `user` parameter, it can safely access `user.IsValid()`, but reaching deeper into `user` by calling `user.GetRole().CanUpdateSite()` starts to get dangerous. For me, this is one of those *rules* which I find hard to visualize or even understand. Until I write a test that is, then it becomes painfully evident that something isn't right. You can often fix the code under test by looking at your test and saying *"this is how I should be able to test this"*. Of course, this is core to what we've been talking about since the start: testing is a means to drive proper design.
 
-As you write more tests and code, you'll notice, by the difficulty in writing clean tests, other patterns emerge. For example, you'll learn to hate anything but simple assignments in your constructors (as you should!). 
+As you write more tests and code you'll notice other patterns emerge. For example, you'll learn to hate anything but simple assignments in your constructors (as you should!). It won't take long before you start to see your tests as design tools more than anything else. 
 
 ### Tests should be meaningful ###
 
@@ -628,7 +630,7 @@ At first this might sound silly, but I think it's common for developers new to t
 
 This brings up the topic of code coverage. Code coverage is the amount (normally as a percentage) of your code which is *covered* by your tests. Code coverage tools run your tests and figure out if a line of code has been executed or not. These tools tend to do one thing very well, and one thing very poorly. They are great for telling you when code hasn't been executed. If a line hasn't been executed, then it's a safe bet you don't have any tests for it (which, again, might not be a huge deal if it's code that can't break, like a simple getter). However, they are horrible at telling you if your coverage is meaningful. Just because your test passes over a piece of code doesn't mean you are actually doing anything meaningful.
 
-This test will give us 100% coverage, but doesn't actually do anything (and this isn't just about missing assertions, code can easily be *covered* and asserting in a meaningless way)
+This test will give us 100% coverage, but doesn't actually do anything (and this isn't just about missing assertions, code can easily be *covered* and asserted in a meaningless way)
 
 	public static int Add(int a, int b)
 	{
@@ -652,7 +654,7 @@ A less common example is inheritance. When you are testing a class which inherit
 ## A Heart to Heart about Stubs and Mocks ##
 
 The first time unit testing clicks for most people is when they start to use a mocking framework. Without such frameworks, testing is impractical. Mocking frameworks enable you to achieve two things. The first
-is that they let you focus on behaviors without having to worry about implementation details. The second is that they let you test the interactions between your dependent objects. Combine these two benefits together and you get code which does what it's supposed to at an individual behavior level and as a complex system.  If X and Y work individually, and Xs is properly integrated with Y, then things are looking good.
+is that they let you focus on behaviors without having to worry about implementation details. The second is that they let you test the interactions between your dependent objects. Combine these two benefits together and you get code which does what it's supposed to at an individual behavior level and as a complex system.  If X and Y work individually, and X is properly integrated with Y, then things are looking good.
 
 Unfortunately, people go overboard. They rely too heavily on mocks and focus too much on the integration of their components. It's probably the exact opposite of what you've been told, but mock objects can actually increase the coupling within your tests and with it their brittleness. Let's look at an example method:
 
@@ -750,7 +752,7 @@ First we'll verify the behavior:
 
 Know that we are specifying the return type via `WithReturnType<T>()` due to limitations of static languages - if I could, I'd get rid of it.
   
-Next we'll write tests to specifically verify that our class properly interacts with it's dependencies:
+Next we'll write tests to specifically verify that our class properly interacts with its dependencies:
 
  	[Test]
 	public void LoadsTheUserFromTheDataStore()
@@ -783,13 +785,13 @@ We won't cover how to do this in any detail. It should be straightforward to imp
 
 I can say that I generally drop all the tables and re-create them before each test (you should have your create statement all written out anyways!). There are a couple reasons not to drop your tables after each test. First, if a test fails you won't be able to see your data. Secondly, if something goes wrong, it's more likely to have a negative impact on the following test.
 
-Just don't be afraid to try.
+Just don't be afraid to try. Although speed hasn't been an issue for me with these types of test, due remember that you can always separate them from your faster unit tests.
 
 ### Equality, Identity and Tests ###
 
 I've written many tests which made unnecessary assumptions about the implementation of my code with respect to identity and equality. Many times it's important to make the distinction, but just as often it isn't.
 
-One of the tests we just wrote made such as an assumption, here it is again:
+One of the tests we just wrote made such an assumption, here it is again:
 
 	[Test]
 	public void ReturnTheValidUser()
@@ -807,7 +809,7 @@ One of the tests we just wrote made such as an assumption, here it is again:
 
 Our test is assuming that our class will return the same instance which our store returned. To be honest, this is probably a safe assumption. It's quite benign and I'd probably keep it like it is. I nonetheless wanted to point it out as an assumption that may or may not be desired or safe.
 
-I have a strong opinion about collection parameters to dependencies. Unless you have specific reason to, you are almost always better off doing a value check of the items within the collection. This is especially true in a Linq-enabled world where new collection instances might be generated (filtered/mapped/etc) from a supplied parameter.
+I have a strong opinion about collection parameters to dependencies. Unless you have specific reason to, you are almost always better off doing a value check of the items within the collection. This is especially true in a LINQ-enabled world where new collection instances might be generated (filtered/mapped/et.) from a supplied parameter.
 
 # In This Chapter #
 
