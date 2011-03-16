@@ -811,7 +811,7 @@ Our test is assuming that our class will return the same instance which our stor
 
 I have a strong opinion about collection parameters to dependencies. Unless you have specific reason to, you are almost always better off doing a value check of the items within the collection. This is especially true in a LINQ-enabled world where new collection instances might be generated (filtered/mapped/et.) from a supplied parameter.
 
-# In This Chapter #
+### In This Chapter ###
 
 The focus of this chapter was on writing effective unit tests. While we covered a few high level topics, such as performance, the real intent was to look at mocking in greater detail. I do think using mocks as a crutch is a common and serious problem. They are tremendously useful and you should use them, just don't mix them up with your behavioral tests. Thankfully most mocking frameworks can generate exactly the kind of stub we're interested in. Furthermore, don't shy away from playing around with unit tests which border on integration tests. Once you have the code to properly set things up, they are quick to write and provide some of your most important coverage.
 
