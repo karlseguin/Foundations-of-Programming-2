@@ -814,3 +814,175 @@ I have a strong opinion about collection parameters to dependencies. Unless you 
 # In This Chapter #
 
 The focus of this chapter was on writing effective unit tests. While we covered a few high level topics, such as performance, the real intent was to look at mocking in greater detail. I do think using mocks as a crutch is a common and serious problem. They are tremendously useful and you should use them, just don't mix them up with your behavioral tests. Thankfully most mocking frameworks can generate exactly the kind of stub we're interested in. Furthermore, don't shy away from playing around with unit tests which border on integration tests. Once you have the code to properly set things up, they are quick to write and provide some of your most important coverage.
+
+## Appendix A - jQuery Basics ##
+ > "I love jQuery" - The Internet
+
+There's a common anecdote given by web developers, it goes something like *I hated JavaScript, then jQuery came along and now I love it*. jQuery is a JavaScript library which takes the pain out of manipulating the DOM and creating reusable JavaScript code. It isn't the only framework of its kind, but it has established itself as the most popular. Part of what makes jQuery so powerful is that it focuses on a few specific things, allowing it to be very good at those. There are two parts to mastering jQuery: first the basics of the library, then how to use the basics to build your own plugins.
+
+A huge part of knowing jQuery is knowing the `jQuery` method and jQuery object. The `jQuery` method is responsible for turning a normal HTML DOM element into a jQuery object. `$` a shorthand for `jQuery`, the two are interchangeable, but most people prefer to use `$` (I know, it seems magical, but it's just a function name - JavaScript allows such characters in function names). A jQuery object is a wrapper around a DOM element which provides all type of useful manipulation and traversing methods. Let's first look at the jQuery method, and then look at jQuery objects.
+
+### jQuery() ###
+In its simplest form, the `jQuery` method will turn a DOM element into a jQuery element:
+	
+		<div id="main"></div>
+		
+		<script type="text/javascript">
+			var domElement = document.getElementById('main');
+			
+			var $main = $(domElement);
+			
+			//or (same thing):
+			var $main = jQuery(domElement);
+		</script>
+(using $ as a prefix to jQuery object variables is a convention I like, if you don't, don't use it.)
+
+Being able to turn a DOM element into a jQuery object is useful, as we'll see in a bit. However, the real power of the `jQuery` method (and jQuery in general) is its ability to take a CSS selector and turn that directly into a jQuery object wrapping the underlying DOM. This is nice for a couple reasons. First, you probably already know how CSS selectors work. Second, CSS selectors have proven to be quite flexible and powerful at selecting elements. Knowing this, we can drop the call to `getElementById` from the above example and simply do:
+
+	var $main = $('#main');
+
+Because, in CSS, you target an element by id using the `#ID` selector. Also, jQuery takes care of cross browser incompatibilities for you. It doesn't matter that IE6 (or 7) doesn't support attribute selector such as `input[type="text"]`. The jQuery selector syntax is **like** CSS selectors, but it uses its own engine, independent of the browser's.
+
+### jQuery object ###
+Before we dig too deeply into the `jQuery` method, let's get up to speed with what it returns: a jQuery object. Actually, the method **always** returns an array of jQuery objects - even when you know it should just return a single value, like in the above code when we selected by id. This actually turns out to provide some nice consistency, in addition to cleaner code (no null checking), as should become evident as we move forward. A jQuery object can be manipulated via various built-in jQuery methods, 3rd party plugins, or your own custom plugins. For now, we'll stick to the built-in methods. Let's look at some examples:
+
+	$main.text('welcome!');
+	$main.addClass('heading');
+	$main.click(function()
+	{
+		alert('WELCOME!');
+	});
+
+As a general rule, a jQuery method (built-in or not) returns the array of jQuery object being manipulated. This means that method calls are meant to be chained, so the above can be rewritten as:
+
+	$main.text('welcome').addClass('heading').click(function()
+	{
+		alert('WELCOME!');
+	});
+
+When dealing with an array of jQuery objects with more than 1 element, all elements items are affected. When dealing with an empty element, nothing happens.
+
+The built-in jQuery method can be broken down into specific categories of behavior. Let's look at a few of the methods in each category.
+
+#### Attribute Methods ####
+Attribute methods let you manipulate the HTML attributes of the DOM elements your jQuery array wraps. We already saw the `text` and `addClass` methods above, but there's also the more generic `attr` and `css` methods, as well as a handful of others:
+
+	$links.attr('href', '#')
+		.text('DOH!')
+		.removeClass('active');
+
+Some jQuery attribute methods have a fairly unique property: they don't return the original array of jQuery objects. Luckily, this is actually pretty intuitive. You see, most of them can be used for both setting a value (like we see above) or reading a value. When reading a value, logically, the value itself is returned (and it's only the first value of the array):
+
+	var firstLink = $('a').attr('href');
+	var tablesBorder = $('table.list').css('border');
+	var username = $('input[name="username"]).val();
+
+#### Traversing ####
+jQuery has an extensive number of traversal methods which let you get to jQuery objects starting from other jQuery objects. The simplest example is the `children` method:
+
+	<ul id="menu">
+		<li><a href="#" class="current">home</a></li>
+		<li><a href="#">login</a></li>
+		<li><a href="#>register</a></li>
+	</ul>
+
+	<script type="text/javascript">
+		var $menuItems = $('ul li');
+		//or
+		var $menuItems = $('ul').children();
+	</script>
+
+The `find` method is similar to `children` except it looks at the children of children (all the way down). So, to find the current menu item, we could do any of the following:
+
+	var $current = $('.current'); //might return more than we want
+	var $current = $('#menu .current'); //just a normal css selector
+	var $current = $('#menu').find('.current');
+	var $current = $('#menu').children().children('.current');
+	var $current = $('#menu a').filter('.current');
+
+Here we see both `find` and `filter` at play (as well as an overload of `children` which takes a selector). All of this is just the tip of the iceberg of both what's built in and what's possible. Here are two other, very common examples:
+
+	$current.sibling().addClass('notActive');
+	var $menu = $current.closest('ul');
+
+`sibling` is self-explanatory. `closest` is the opposite of `find` going **up** the hierarchy looking for a match. There's also `parent` which finds the immediate parent, but if you find yourself chaining calls to `parent` it'll almost always be better than use `closest`:
+
+	var $menu = $current.closest('ul'); //much better than:
+	var $menu = $current.parent().parent();
+
+It's possible that you are put off by the seemingly limitless way you can target specific elements. The truth is that in real code and with a experience, a best way is generally obvious.
+
+#### Manipulation ####
+The manipulation method give us great control over changing our elements. There's some overlap between these and the attribute methods, so we'll focus on moving things around:
+
+	$('#menu').clone().appendTo($('body'));
+	#('.current').remove();
+	$('#menu a).wrapAll('<p></p>');
+
+These kind of methods are particularly useful when writing plugins and aren't as useful as standalone calls.
+
+#### Events ####
+Event methods let you cleanly hook up events (again, in a cross platform manner) to jQuery objects. For example, not all browsers support the CSS :hover pseudo-selector on all types of elements, but with jQuery we can use the `mouseenter` and `mouseleave` events to accomplish something similar (there's also a `hover` event, but I find it somewhat cumbersome):
+
+	$('tr').mouseenter(function()
+	{
+		$(this).addClass('hover');
+	}).mouseleave(function()
+	{
+		$(this).removeClass('hover');
+	}).click(function()
+	{
+		alert('Your clicked the row at index: ' + $(this).index());
+	});
+
+Woah, what's all `$(this)` about? `this` is the one tricky thing you'll have to really think about if you want to learn jQuery - it's where normal JavaScript bleeds into jQuery. `this` is a special keyword in JavaScript which has special contextual meaning - change the context, and chances are `this` will mean something else (when you think about it, this is true of C# as well). When JavaScript raises an event, `this` becomes the DOM element on which the event was raised. In our example above, `this` is the table row (tr) which caused either a mouse enter or mouse leave event. As we saw in our very first jQuery example, a DOM element can be turned into a jQuery element by using the `jQuery` method. So, in short, `$(this)` is turning the DOM element represented by `this` (which in the case of events is the DOM element which caused the event) into a jQuery object.
+
+#### document.ready ####
+There's one special event that we probably should have talked about by now. All of our jQuery examples have placed our JavaScript code directly in a &lt;script&gt; tag. This will work, however it can cause some odd flickering as the page first loads and displays the initial state, and then your jQuery code changes it. Ideally, we want to apply our manipulation as soon as the elements are loaded, but before they are displayed. In standard HTML, there's a `readyStateChanged` event which can be used for just this type of thing. jQuery provides a handy way to leverage it:
+
+	$(document).ready(function()
+	{
+		//all your code should go here
+	});
+
+If you've been following along, the above should be a pretty clear 2 step process. First, we turn the `document` element into a jQuery object (`$(document)`), next we hook into its `ready` event.
+
+### Bringing It Together ###
+When you put all the pieces together, you end up with the capability to write some pretty nice JavaScript code with a minimum amount of effort. For example, let's use what we've learned to build some basic tabs (this is an ideal candidate for a plugin, but let's not worry about that for now):
+
+	<style>
+		a.active{font-weight:bold;}
+	</style>
+
+	<ul class="tabs">
+		<li><a href="#main">main</a></li>
+		<li><a href="#about">about</a></li>
+		<li><a href="#download">download</a></li>
+	</ul>
+	
+	<div id="main" class="panel">This is the main panel</div>
+	<div id="about" class="panel">this is the about panel</div>
+	<div id="download" class="panel">this is the download panel</div>
+	
+	<script type="text/javascript">
+	$(document).ready(function()
+	{
+		var $panels = $('.panel').hide();
+		
+		var $links = $('.tabs a'); 
+		$links.click(function()
+		{
+			var $link = $(this);
+			$links.removeClass('active');
+			$link.addClass('active');
+			
+			$panels.hide();
+			$panels.filter($link.attr('href')).show();	
+		}).filter(':first').click();
+	});
+	</script>
+
+There isn't too too much going on here. The first thing we do is get a reference to and hide all of the panels. Next we hook into the click event for each of our menu's links. Within this event we do a few things, but it all starts by getting a reference to the clicked linked. We remove the `active` class from any link and hide all the panels (there are a lot of ways we could have done this, but this is probably the simplest). The last step within the click event is to show the corresponding panel (notice that link's href conveniently references the appropriate panel's id). There's one last step, which is easy to miss, and that is we trigger a `click` on the first link (we'll look at the `:first` selector in the next section). This last step, accomplished via the useful `filter` method, causes our page to initialize to a reasonable default.
+
+### In This Chapter ###
+We've only covered a small part of jQuery's built-in capabilities. There are ajax methods and effect methods we didn't look at, as well as many more selectors, traversal, manipulation and events. What's important to take away from this chapter is that the `jQuery` method (or `$`) takes a CSS selector (or less frequently an existing DOM object) and returns an array of jQuery objects. These jQuery objects have a number of built-in methods which aren't only valuable by themselves, but serve as the foundation for writing your own methods that can encompass a specific behavior (which is what the next chapter is all about).
