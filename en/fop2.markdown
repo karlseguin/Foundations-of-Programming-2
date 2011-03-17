@@ -905,7 +905,7 @@ Here we see both `find` and `filter` at play (as well as an overload of `childre
 	$current.sibling().addClass('notActive');
 	var $menu = $current.closest('ul');
 
-`sibling` is self-explanatory. `closest` is the opposite of `find` going **up** the hierarchy looking for a match. There's also `parent` which finds the immediate parent, but if you find yourself chaining calls to `parent` it'll almost always be better than use `closest`:
+`sibling` is self-explanatory. `closest` is the opposite of `find` going **up** the hierarchy looking for a match. There's also `parent` which finds the immediate parent, but if you find yourself chaining calls to `parent` it'll almost always be better to use `closest`:
 
 	var $menu = $current.closest('ul'); //much better than:
 	var $menu = $current.parent().parent();
