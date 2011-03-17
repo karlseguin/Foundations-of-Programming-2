@@ -916,7 +916,7 @@ It's possible that you are put off by the seemingly limitless way you can target
 The manipulation method give us great control over changing our elements. There's some overlap between these and the attribute methods, so we'll focus on moving things around:
 
 	$('#menu').clone().appendTo($('body'));
-	#('.current').remove();
+	$('.current').remove();
 	$('#menu a).wrapAll('<p></p>');
 
 These kind of methods are particularly useful when writing plugins and aren't as useful as standalone calls.
