@@ -818,9 +818,9 @@ The focus of this chapter was on writing effective unit tests. While we covered 
 ## Appendix A - jQuery Basics ##
  > "I love jQuery" - The Internet
 
-There's a common anecdote given by web developers, it goes something like *I hated JavaScript, then jQuery came along and now I love it*. jQuery is a JavaScript library which takes the pain out of manipulating the DOM and creating reusable JavaScript code. It isn't the only framework of its kind, but it has established itself as the most popular. Part of what makes jQuery so powerful is that it focuses on a few specific things, allowing it to be very good at those. There are two parts to mastering jQuery: first the basics of the library, then how to use the basics to build your own plugins.
+There's a common anecdote given by web developers that goes something like *I hated JavaScript, then jQuery came along and now I love it*. jQuery is a JavaScript library which takes the pain out of manipulating the DOM and creating reusable JavaScript code. It isn't the only framework of its kind, but it has established itself as the most popular. Part of what makes jQuery so powerful is that it focuses on a few specific things, allowing it to be very good at those. There are two parts to mastering jQuery: the basics of the library and how to use the basics to build your own plugins.
 
-A huge part of knowing jQuery is knowing the `jQuery` method and jQuery object. The `jQuery` method is responsible for turning a normal HTML DOM element into a jQuery object. `$` is a shorthand for `jQuery`, the two are interchangeable, but most people prefer to use `$` (I know, it seems magical, but it's just a function name - JavaScript allows such characters in function names). A jQuery object is a wrapper around a DOM element which provides all type of useful manipulation and traversing methods. Let's first look at the jQuery method, and then look at jQuery objects.
+A huge part of knowing jQuery is knowing the `jQuery` method and jQuery object. The `jQuery` method is responsible for turning a normal HTML DOM element into a jQuery object. `$` is a shorthand for `jQuery`, the two are interchangeable, but most people prefer to use `$` (I know, it seems magical, but it's just a function name - JavaScript allows such characters in function names). A jQuery object is a wrapper around a DOM element which provides all types of useful manipulation and traversing methods. Let's first look at the jQuery method, and then look at jQuery objects.
 
 ### jQuery() ###
 In its simplest form, the `jQuery` method will turn a DOM element into a jQuery element:
@@ -837,7 +837,7 @@ In its simplest form, the `jQuery` method will turn a DOM element into a jQuery 
 		</script>
 (using $ as a prefix to jQuery object variables is a convention I like, if you don't, don't use it.)
 
-Being able to turn a DOM element into a jQuery object is useful, as we'll see in a bit. However, the real power of the `jQuery` method (and jQuery in general) is its ability to take a CSS selector and turn that directly into a jQuery object wrapping the underlying DOM. This is nice for a couple reasons. First, you probably already know how CSS selectors work. Second, CSS selectors have proven to be quite flexible and powerful at selecting elements. Knowing this, we can drop the call to `getElementById` from the above example and simply do:
+Being able to turn a DOM element into a jQuery object is useful, as we'll see in a bit. However, the real power of the `jQuery` method (and jQuery in general) is its ability to take a CSS selector and turn that directly into a jQuery object wrapping the underlying DOM. This is nice for a couple of reasons. First, you probably already know how CSS selectors work. Second, CSS selectors have proven to be quite flexible and powerful at selecting elements. Knowing this, we can drop the call to `getElementById` from the above example and simply do:
 
 	var $main = $('#main');
 
@@ -860,7 +860,7 @@ As a general rule, a jQuery method (built-in or not) returns the array of jQuery
 		alert('WELCOME!');
 	});
 
-When dealing with an array of jQuery objects with more than 1 element, all elements items are affected. When dealing with an empty element, nothing happens.
+When dealing with an array of jQuery objects with more than 1 element, all elements are affected. When dealing with an empty element, nothing happens.
 
 The built-in jQuery method can be broken down into specific categories of behavior. Let's look at a few of the methods in each category.
 
@@ -900,7 +900,7 @@ The `find` method is similar to `children` except it looks at the children of ch
 	var $current = $('#menu').children().children('.current');
 	var $current = $('#menu a').filter('.current');
 
-Here we see both `find` and `filter` at play (as well as an overload of `children` which takes a selector). All of this is just the tip of the iceberg of both what's built in and what's possible. Here are two other, very common examples:
+Here we see both `find` and `filter` at play (as well as an overload of `children` which takes a selector). All of this is just the tip of the iceberg of both what's built in and what's possible. Here are two other common examples:
 
 	$current.sibling().addClass('notActive');
 	var $menu = $current.closest('ul');
@@ -910,10 +910,10 @@ Here we see both `find` and `filter` at play (as well as an overload of `childre
 	var $menu = $current.closest('ul'); //much better than:
 	var $menu = $current.parent().parent();
 
-It's possible that you are put off by the seemingly limitless way you can target specific elements. The truth is that in real code and with a experience, a best way is generally obvious.
+It's possible that you are put off by the seemingly limitless way you can target specific elements. The truth is that in real code and with experience, a best way is generally obvious.
 
 #### Manipulation ####
-The manipulation method give us great control over changing our elements. There's some overlap between these and the attribute methods, so we'll focus on moving things around:
+The manipulation methods give us great control over changing our elements. There's some overlap between these and the attribute methods, so we'll focus on moving things around:
 
 	$('#menu').clone().appendTo($('body'));
 	$('.current').remove();
