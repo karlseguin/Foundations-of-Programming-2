@@ -10,7 +10,7 @@ You can see the full text of the license at:
 <http://creativecommons.org/licenses/by-nc/3.0/legalcode>
 
 ## Latest Version ##
-This book is currently in development. The final release is expected to be in early February 2011.
+This book is currently in development.
 
 To get the latest version, visit <http://github.com/karlseguin/foundations2>.
 
@@ -986,3 +986,296 @@ There isn't too too much going on here. The first thing we do is get a reference
 
 ### In This Chapter ###
 We've only covered a small part of jQuery's built-in capabilities. There are ajax methods and effect methods we didn't look at, as well as many more selectors, traversal, manipulation and events. What's important to take away from this chapter is that the `jQuery` method (or `$`) takes a CSS selector (or less frequently an existing DOM object) and returns an array of jQuery objects. These jQuery objects have a number of built-in methods which aren't only valuable by themselves, but serve as the foundation for writing your own methods that can encompass a specific behavior (which is what the next chapter is all about).
+
+## Appendix B - Advanced jQuery ##
+jQuery is a rewarding library to learn, not only because what you learn in the first 30 minutes can be of real use, but also because the foundations you learn early on serves as the backbone for more advance usage. This chapter is dedicated to a few of those more advanced jQuery usages.
+
+### Custom Selectors ###
+Our story, thus far, has been that jQuery uses CSS selectors (including some of the more advanced CSS3 selectors). While this is true, jQuery also has its own selectors which are quite handy. These custom selectors are easy to spot as they always begin with a colon. We already saw one in our final example of the previous chapter, `:first`. There's also a corresponding `:last` selector. Beyond these, and a handful of others there are a few which are worth pointing out.
+
+#### :not ####
+The `:not` selector looks for the inverse of the supplied selector. You use it like so:
+
+	var $notFirst = $('.tabs a').filter(':not(:first)');
+	//or
+	var $notFirst = $('.tabs :not(a:first)');
+
+As you can see `:not` is special, though not unique, as it takes a sort of argument to work.
+
+#### :eq ####
+The `:eq` selector, like `:not`, takes an argument which is the index of the element we want to find:
+
+	//yes, it's base zero
+	var $secondLink = $('a:eq(1)');
+
+It isn't too uncommon that you'll see and use this ugly code:
+
+	var $item = $('td:eq(' + i + ')');
+
+Where i would be the index of a cell you want to find.
+
+#### :visible and :hidden ####
+`:visible` and `:hidden` aren't particularly advanced, but they are useful enough to point out. They work like you think, and they work surprisingly well. They both go beyond simply checking the CSS visibility of an item, but also its height and all types of things which really indicate whether the item is visible or not. In our tabs example from the previous chapter, instead of potentially hiding already hidden panels, we could have done:
+
+	//only hide the visible panels
+	$panels.filter(':visible').hide();
+
+Though, to be honest, I think it's simpler just to hide them all.
+
+#### Writing Your Own ####
+Occasionally you might need to write your own selector. This doesn't happen often, but on a few occasions I've had need to find elements by their `innerText` value (there's a `:contains` selector, but that does a fuzzy search, I wanted an exact one). jQuery makes this easy:
+
+	$.expr[':'].textIs = function(obj, index, meta, stack){
+			return obj.innerText == meta[3];
+	};
+
+We attach our own function to jQuery's `$.expr[:]` object named `textIs`. The first parameter is the DOM element being compared (we could convert that to a jQuery object if we needed to). The second parameter is the index of this particular element with respect to all potential matches. The meta parameter is information about the actual selector - you can think of it as the captures from a regular expression, and you'll probably need to `console.log(meta)` to get a sense for what part you are interested in. The last parameter is an array of all the potentially found elements (so `stack[index] == obj`) - this is useful if your selector is doing something relative to other elements.
+
+#### Hierarchy Flattening ####
+There's at least one thing which isn't intuitive about how selectors work (well, to me at least). Despite the fact that the DOM is a hierarchy, the `jQuery` method always flattens results. What do I mean by this? Say we wanted to add a class to the last column of every row. You might be tempted to try:
+
+	$('tbody tr').children('td:last').addClass('last');
+
+But if your table has more than 1 row, this isn't going to work. When you call `children`, the cells aren't grouped by rows, they are flattened into a single array. Therefore, the above code is only going to apply the `last` class to the very last cell of the entire table. The solution is to use the `each` method:
+
+	$('tbody tr').each(function(index, tr)
+	{
+		$(tr).children(':last').addClass('last');
+	});
+
+The `each` method, along with events, is where you are most likely to turn a DOM element into a jQuery object.
+
+#### DOM Creation ####
+We've seen how we can use the `jQuery` method to get a jQuery object form a CSS selector or from an existing DOM element. The method actually has a third usage: creating new elements. If you pass `$` an HTML tag, it'll create the corresponding element:
+
+	var $div = $('<div>');
+
+You can even get fancy:
+
+	var $div = $('<div class="neato">neat!</div>');
+	//or
+	var $div = $('<div>').addClass('neato').text('neat!');
+
+Note that an element created this way isn't added to the DOM by default - only you know where it ought to go:
+
+	var $div = $('<div class="error">').appendTo($('#header'));
+
+### AJAX ###
+jQuery has a handful of methods which makes writing ajax code simple. The first two are `$.get` and `$.post` which, as you can probably guess, issue an ajax `get` and `post` respectively. They both take 4 parameters: the URL, the data, a callback, and a return type:
+
+	$.get('/user', {id: 123}, function(response, status)
+	{
+		//do something
+	}, 'json');
+	
+	$.post('/game', {name: 'TileFlod', version: 2}, gameSaved, 'html');
+	function gameSaved(response, status) 
+	{
+		//do something
+	}
+
+This is probably a good time to point out that given a form object, you can call `serialize` on it to get submittable data:
+
+	$.post('/game', $('#addGame').serialize(), ..., ...);
+
+Both of the above methods actually abstract the more powerful `$.ajax` method. This method takes a single object literal:
+
+	$.ajax(
+	{
+		async: false,
+		cache: false,
+		url: '/game',
+		type: 'get',
+		success: function(response, status) {
+			
+		},
+		//and so on
+	});
+
+Finally, the last ajax method that we'll look at is the `load` plugin. `load` abstracts `$.get` or `$.post` (depending on whether data is provided), and automatically loads the response into the calling object:
+
+	$('#myDiv').load('/about/moreinfo');
+
+Which is equivalent to:
+
+	$.get('/about/moreinfo', null, function(response)
+	{
+		$('myDiv').html(response);
+	}, 'html');
+
+
+### Delegates ###
+Sooner or later you're going to want to sprinkle your jQuery goodness over dynamically loaded HTML. The most common example is a list of rows, with a click event (to see the details) which dynamically grows/changes. An ugly solution, which might be quite tricky at times, is to hook events as your new rows come in.
+
+	//called initially for the statically loaded rows
+	var $list = $('#myList');
+	$list.find('tr').click(showDetails);
+	
+	function showDetails(row)
+	{
+		//do something
+	}
+	
+	//somewhere else in your code:
+	$('#add').click(function()
+	{
+		$.post(URL, PARAMS, function(newRow)
+		{
+			$(newRow).click(showDetails).appendTo($list.find('tbody'));
+		});
+	});
+
+You aren't only repeating the code to set up the click, but you're also polluting the save process with details about the table's display. There's yet another problem with the above approach - it doesn't scale. I know talking about scalability with respect to "client-side" code might seem odd, but add enough event handlers and you really might start having performance issues.
+
+The solution? jQuery has a `delegate` method which works by attaching a single event to a parent element which then watches (or delegates) to child elements. Let's rewrite the above code to use it:
+
+	var $list = $('#myList');
+	$list.delegate('tr', 'click', showDetails);
+	
+	function showDetails(row)
+	{
+		//do something
+	}
+
+That's it. Rows which are dynamically added later are automatically covered by the delegate since it exists on their (future) parent table. The code says that whenever a `tr` element within `#myList` is `click`ed execute `showDetails`. The selector, the first parameter, can be any jQuery selector. The implementation relies on bubbling, which does mean that for some events it won't work, but for the most common (like `click`) it's an extremely powerful solution.
+
+Its worth pointing out that jQuery also has a `live` method, which is very similar to `delegate`:
+
+	$('tr').live('click', showDetails);
+	
+	function showDetails(row)
+	{
+		//do something
+	}
+
+While the syntax for `live` is nicer, it lacks a scope that `delegate` has. This results in poorer performance, and also less control (you might not want to apply this to **every** `tr` on the page). 
+
+### Writing Plugins ###
+So far we've looked at a number of built-in jQuery methods which, while useful on their own, truly shine when used within plugins. I like to think of plugins as belonging to one of two categories. The first category is for UI plugins, like tabs or dialogs. The second is for more task specific plugins, often bringing multiple UI plugins together to accomplish something pretty specific within a page/app. Both are built the exact same way, the only difference is that you want to make sure UI plugins are truly reusable. (It's worth noting that there's a large number of existing quality and free UI plugins available for jQuery, just google for them).
+
+Whenever I write a plugin I start with a basic template. At first, parts of the template might seem difficult. We'll go over those difficult parts, but even if you don't fully understand it now, you can easily use it and safely ignore the plumbing. First though, when you call a method on a jQuery object, be it a built-in method or a plugin, that method exists within the the `jQuery.fn` object. So, a basic example might look something like:
+
+	//remember $ and jQuery are the same thing
+	$.fn.tabs = function()
+	{
+			//do something
+	};
+
+Since it's possible for another library to define `$` (this was a common problem before jQuery become overwhelmingly popular), there's a safer way to write the same code:
+
+	(function($))
+	{
+		$.fn.tabs = function()
+		{
+			
+		};
+	})(jQuery);
+
+I know it looks a little crazy, but it's quite neat and worth understanding. There's nothing more complicated here than defining a dynamic method and passing in a parameter. Look at a more explicit example:
+	
+	(function(question, answer)
+	{
+		alert(question + ' ' + answer);
+	})('its over', 9000)();
+
+We define a method that takes 2 parameters, `question` and `answer`, and then invoke it with with two values `its over` and `9000`.
+
+The jQuery example is the same, except it's a single parameter which we name `$` and we pass in the `jQuery` object. The effect is that even if `$` is defined as something else globally, within our dynamic method (technically a closure), it's simply a parameter which we've assigned to `jQuery` (another library could always come along and redefine `jQuery`, but that's less likely).
+
+The other thing that's important to remember when writing a plugin is that, like most built-in jQuery methods, you should write your plugin so that it both works on an array of jQuery objects and so that it returns the jQuery object (this allows your plugin to be used in a method chain). 
+
+With that out of the way our template (which follows the two rules we've discussed above) looks like:
+
+	(function($) 
+	{
+	  var defaults = {};
+	  $.fn.PLUGINNAME = function(options) 
+	  {        
+	    var opts = $.extend({}, defaults, options);
+	    return this.each(function() 
+	    {
+	      if (this.PLUGINNAME) { return false; }
+	      var self = 
+	      {   
+	        initialize: function()
+	        {
+        
+	        }
+	      };
+	      this.PLUGINNAME = self;
+	      self.initialize();      
+	    });
+	  };
+	})(jQuery);
+
+All you need to do for your own plugin is copy the above and replace the three instances of `PLUGINNAME` with the name of your own plugin. The `defaults` variable is used for your plugins default values - which can be overwritten by supplying a options when creating your plugin. Notice the call `return this.each`, this is the magic that makes our plugin work against and array of jQuery object and which returns that array. We also store our plugin within the item by calling `this.PLUGINNAME = self` and when we setup the plugin, we return if `this.PLUGINNAME` is not null - this makes sure that, for a given element, our plugin is only defined once.
+
+Let's use this template to rewrite our `tabs` code from the previous chapter to get a better idea of how this all actually works:
+
+	<style>
+		a.active{font-weight:bold;}
+	</style>
+	
+	<ul class="tabs">
+		<li><a href="#main">main</a></li>
+		<li><a href="#about">about</a></li>
+		<li><a href="#download">download</a></li>
+	</ul>
+	<div id="mainPanels">
+		<div id="main" class="panel">This is the main panel</div>
+		<div id="about" class="panel">this is the about panel</div>
+		<div id="download" class="panel">this is the download panel</div>
+	</div>
+	
+	(function($) 
+	{
+	  var defaults = {initialTab: ':first', panelContainer: null};
+	  $.fn.tabs = function(options) 
+	  {
+		
+			//overwrites the detauls with the supplied options
+	    var opts = $.extend({}, defaults, options);
+	    
+			return this.each(function() 
+			{
+	      if (this.tabs) { return false; }
+			 
+				//we can define fields for our plugin to have access to
+				var $tabContainer = $(this);
+				var $links = $tabContainer.find('a');
+				var $panelContainer = $(opts.panelContainer);
+	    
+	  		var self = 
+	  		{   
+	        initialize: function()
+	        {
+						self.hidePanels();
+      			$links.click(self.clicked).filter(opts.initialTab).click();
+	        },
+					clicked: function() 
+					{
+						var $link = $(this);
+						$links.removeClass('active');
+						$link.addClass('active');
+						self.hidePanels();
+						$panelContainer.find($link.attr('href')).show();
+					},
+					hidePanels: function() 
+					{
+						$panelContainer.find('.panel').hide();
+					}
+	      };
+	      this.tabs = self;
+	      self.initialize();      
+	    });
+	  };
+	})(jQuery);
+
+We've made some slight modifications to make the plugin more reusable, but for the most part not much has changed. We can call this plugin by simply doing:
+
+	$('.tabs').tabs({panelContainer: '#mainPanels'});
+
+Most of my plugins follow the same pattern. The real trick, as I mentioned before, is to keep plugins focused. As you start to write plugins, there'll likely be some discomfort about purpose. Each of your page will likely have unique needs and it might be tempting to write a large plugin for each. You can start this way, but try to refactor common code out into their own plugins.
+
+### In This Chapter ###
+Over the last two chapter's we've seen the power of jQuery. Yet, for all its flexibility, the truth is that jQuery is an extremely simple and focused library. If you understand and remember the fundamentals - how the `$` can be used, understanding the relationship between a DOM element and its jQuery wrapper, and knowing what `this` means in a given context - then you'll easily master jQuery. It's a library worth knowing, not just because of how useful it is, but also because it showcases what a good library should be like - focused and simple, yet somehow easily extensible. Don't get overwhelmed though, since we did cover a lot of material. Start small and, at your own pace, move forward.
