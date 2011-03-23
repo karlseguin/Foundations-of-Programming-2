@@ -1165,7 +1165,7 @@ Whenever I write a plugin I start with a basic template. At first, parts of the 
 
 Since it's possible for another library to define `$` (this was a common problem before jQuery became overwhelmingly popular), there's a safer way to write the same code:
 
-	(function($))
+	(function($)
 	{
 		$.fn.tabs = function()
 		{
