@@ -705,7 +705,7 @@ Let's go back to an old example and test it using what we just learnt. First, th
 
 	public User FindByCredentials(string username, string password)
 	{
-		var user = _store.FindOneByNamedQuery("FindUserByUserName", new {username = username});
+		var user = _store.FindOneByNamedQuery("FindUserByUserName", username);
 		if (user == null) { return null; }
 		return _encryption.CheckPassword(user.Password, password) ? user : null;
 	}
@@ -759,7 +759,7 @@ Next we'll write tests to specifically verify that our class properly interacts 
 	{
 	  var store = A.Fake<IDataStore>();
     new UserRepository(store, A.Fake<IEncryption>()).FindByCredentials("a", "b");
-	  A.CallTo(() => store.FindOneByNamedQuery("FindUserByUserName", new {username = "a"})).MustHaveHappened();  
+	  A.CallTo(() => store.FindOneByNamedQuery("FindUserByUserName", "a"})).MustHaveHappened();  
 	}
 	
 	[Test]
@@ -767,7 +767,7 @@ Next we'll write tests to specifically verify that our class properly interacts 
 	{
 	  var store = A.Fake<IDataStore>();
 	  var encryption = A.Fake<IEncryption>();
-    var user = new User{Passowrd = "admin"};
+    var user = new User{Password = "admin"};
     
 	  Any.CallTo(store).WithReturnType<User>().Returns(user);
     new UserRepository(store, encryption).FindByCredentials("a", "b");
@@ -1023,13 +1023,13 @@ Where i would be the index of a cell you want to find.
 Though, to be honest, I think it's simpler just to hide them all.
 
 #### Writing Your Own ####
-Occasionally you might need to write your own selector. This doesn't happen often, but on a few occasions I've had need to find elements by their `innerText` value (there's a `:contains` selector, but that does a fuzzy search, I wanted an exact one). jQuery makes this easy:
+Occasionally you might need to write your own selector. This doesn't happen often, but on a few occasions I've had need to find elements by their `innerText` value (there's a `:contains` selector, but that does a fuzzy search and I wanted an exact one). jQuery makes this easy:
 
 	$.expr[':'].textIs = function(obj, index, meta, stack){
 			return obj.innerText == meta[3];
 	};
 
-We attach our own function to jQuery's `$.expr[:]` object named `textIs`. The first parameter is the DOM element being compared (we could convert that to a jQuery object if we needed to). The second parameter is the index of this particular element with respect to all potential matches. The meta parameter is information about the actual selector - you can think of it as the captures from a regular expression, and you'll probably need to `console.log(meta)` to get a sense for what part you are interested in. The last parameter is an array of all the potentially found elements (so `stack[index] == obj`) - this is useful if your selector is doing something relative to other elements.
+We attach our own function to jQuery's `$.expr[:]` object named `textIs`. The first parameter is the DOM element being compared (we could convert that to a jQuery object if we needed to). The second parameter is the index of this particular element with respect to all potential matches. The meta parameter is information about the actual selector - you can think of it as the captures from a regular expression, and you'll probably need to `console.log(meta)` to get a sense of what part you are interested in. The last parameter is an array of all the potentially found elements (so `stack[index] == obj`) - this is useful if your selector is doing something relative to other elements.
 
 #### Hierarchy Flattening ####
 There's at least one thing which isn't intuitive about how selectors work (well, to me at least). Despite the fact that the DOM is a hierarchy, the `jQuery` method always flattens the results. What do I mean by this? Say we wanted to add a class to the last column of every row. You might be tempted to try:
@@ -1155,7 +1155,7 @@ While the syntax for `live` is nicer, it lacks a scope that `delegate` has. This
 ### Writing Plugins ###
 So far we've looked at a number of built-in jQuery methods which, while useful on their own, truly shine when used within plugins. I like to think of plugins as belonging to one of two categories. The first category is for UI plugins, like tabs or dialogs. The second is for more task specific plugins, often bringing multiple UI plugins together to accomplish something pretty specific within a page/app. Both are built the exact same way. The only difference is that you want to make sure UI plugins are truly reusable. (It's worth noting that there are a large number of existing quality and free UI plugins available for jQuery, just Google for them).
 
-Whenever I write a plugin I start with a basic template. At first, parts of the template might seem difficult. We'll go over these, but even if you don't fully understand it, you can easily use the template while safely ignoring the "plumbing". First though, when you call a method on a jQuery object, be it a built-in method or a plugin, that method exists within the the `jQuery.fn` object. So, a basic example might look something like:
+Whenever I write a plugin I start with a basic template. At first, parts of the template might seem difficult. We'll go over these, but even if you don't fully understand it, you can easily use the template while safely ignoring the "plumbing". First though, when you call a method on a jQuery object, be it a built-in method or a plugin, that method exists within these `jQuery.fn` object. So, a basic example might look something like:
 
 	//remember $ and jQuery are the same thing
 	$.fn.tabs = function()
@@ -1163,7 +1163,7 @@ Whenever I write a plugin I start with a basic template. At first, parts of the 
 			//do something
 	};
 
-Since it's possible for another library to define `$` (this was a common problem before jQuery become overwhelmingly popular), there's a safer way to write the same code:
+Since it's possible for another library to define `$` (this was a common problem before jQuery became overwhelmingly popular), there's a safer way to write the same code:
 
 	(function($))
 	{
