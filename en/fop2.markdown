@@ -12,7 +12,7 @@ You can see the full text of the license at:
 ## Latest Version ##
 This book is currently in development.
 
-To get the latest version, visit <http://github.com/karlseguin/foundations2>.
+To get the latest version, visit <https://github.com/karlseguin/Foundations-of-Programming-2>.
 
 ## About The Author ##
 Karl Seguin is a developer with experience across various fields and technologies. He's an expert .NET developer and burgeoning Ruby developer. He's familiar with all aspects of web development, concurrent and socket programming and various SQL and NoSQL technologies. He's a semi active contributor to OSS projects, a technical writer and an occasional speaker.
